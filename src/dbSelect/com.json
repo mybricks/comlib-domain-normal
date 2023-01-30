@@ -1,34 +1,34 @@
 {
-  "title": "选择数据",
+  "title": "查询数据",
   "namespace": "mybricks.domain.select",
   "author": "CheMingjun",
   "author_name": "车明君",
   "version": "1.0.0",
-  "description": "类型转换",
-  "icon": "./icon.png",
+  "description": "选择数据",
+  "icon": "./icon.svg",
   "runtime": "./rt.tsx",
   "editors": "./editors.tsx",
-  "rtType": "js",
+  "rtType": "js-autorun",
   "inputs": [
     {
-      "id": "参数",
-      "title": "从",
+      "id": "params",
+      "title": "参数",
       "schema": {
         "type": "follow"
       },
       "rels": [
-        "to"
-      ]
+        "rtn"
+      ],
+      "editable": true
     }
   ],
   "outputs": [
     {
-      "id": "to",
+      "id": "rtn",
       "title": "结果",
       "schema": {
         "type": "unknown"
       },
-      "conMax": 1,
       "editable": true
     }
   ]

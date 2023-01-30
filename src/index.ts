@@ -7,9 +7,13 @@
  * mybricks@126.com
  */
 
-import selectDef from './sqlSelect/com.json'
-import selectRt from './sqlSelect/rt'
-import selectEditors from './sqlSelect/editors'
+import selectDef from './dbSelect/com.json'
+import selectRt from './dbSelect/rt'
+import selectEditors from './dbSelect/editors'
+
+import insertDef from './dbInsert/com.json'
+import insertRt from './dbInsert/rt'
+import insertEditors from './dbInsert/editors'
 
 const lib = {
   id: 'mybricks.comlib.domain',
@@ -22,6 +26,11 @@ const lib = {
       comDef: selectDef,
       rt: selectRt,
       editors: selectEditors
+    }),
+    merge({
+      comDef: insertDef,
+      rt: insertRt,
+      editors: insertEditors
     })
   ],
   //visible: true,
