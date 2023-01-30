@@ -2,5 +2,6 @@
   "comAry": [
     "./src/sqlSelect/com.json",
     "./src/dbInsert/com.json"
-  ]
+  ],
+  "target": "node"
 }
