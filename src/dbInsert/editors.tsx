@@ -14,7 +14,7 @@ export default {
       type: 'domain.dbInsert',
       options({data, input, output}) {
         return {
-          paramSchema: input.get('params').schema
+          paramSchema: input.get('params').schema || {}
         }
       },
       value: {
