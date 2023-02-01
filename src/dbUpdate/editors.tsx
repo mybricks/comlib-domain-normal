@@ -14,8 +14,10 @@ export default {
       type: 'domain.dbUpdate',
       options({data, input, output}) {
         return {
-          paramSchema: input.get('params').schema || {}
-        }
+          get paramSchema() {
+            return input.get('params').schema;
+          }
+        };
       },
       value: {
         get({data, input, output}) {
