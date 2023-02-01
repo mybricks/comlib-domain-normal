@@ -24,7 +24,9 @@ export default {
       type: 'domain.dbSelect',
       options({data, input, output}) {
         return {
-          paramSchema: input.get('params').schema
+          get paramSchema(){
+            return input.get('params').schema
+          }
         }
       },
       value: {
