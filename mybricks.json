@@ -1,7 +1,8 @@
 {
   "comAry": [
     "./src/dbSelect/com.json",
-    "./src/dbInsert/com.json"
+    "./src/dbInsert/com.json",
+    "./src/code-segment/com.json"
   ],
   "target": "node"
 }
