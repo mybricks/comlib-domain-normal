@@ -19,6 +19,10 @@ import updateDef from './dbUpdate/com.json'
 import updateRt from './dbUpdate/rt'
 import updateEditors from './dbUpdate/editors'
 
+import codeDef from './code-segment/com.json'
+import codeRt from './code-segment/rt'
+import codeEditors from './code-segment/editors'
+
 const lib = {
   id: 'mybricks.comlib.domain',
   title: '领域模型组件库',
@@ -40,6 +44,11 @@ const lib = {
       comDef: updateDef,
       rt: updateRt,
       editors: updateEditors
+    }),
+    merge({
+      comDef: codeDef,
+      rt: codeRt,
+      editors: codeEditors
     })
   ],
   //visible: true,
