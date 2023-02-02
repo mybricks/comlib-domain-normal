@@ -24,8 +24,8 @@ export default {
       type: 'domain.dbSelect',
       options({data, input, output}) {
         return {
-          get paramSchema(){
-            return input.get('params').schema
+          get paramSchema() {
+            return input.get('params').schema || {};
           }
         }
       },
@@ -34,7 +34,7 @@ export default {
           return data.selector
         },
         set({data, setDesc, outputs}, val) {
-          data.selector = val
+          data.selector = val;
 
           if (data.selector.sql) {
             setDesc(`已选择 ${data.selector.desc}`)
