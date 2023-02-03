@@ -1,4 +1,4 @@
-import {FieldBizType, FieldDBType, SQLWhereJoiner} from '../_constants/field';
+import {FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner} from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -39,3 +39,5 @@ export interface Condition {
 	conditions: Condition[];
 	whereJoiner: SQLWhereJoiner;
 }
+
+export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };

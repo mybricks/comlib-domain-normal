@@ -22,15 +22,24 @@ export enum SQLOperator {
 	/** 不等于 */
 	NOT_EQUAL = '<>',
 	/** 匹配 */
-	LIKE = 'like',
+	LIKE = 'LIKE',
 	/** 不匹配 */
-	NOT_LIKE = 'not like',
+	NOT_LIKE = 'NOT LIKE',
 	/** 包含 */
-	IN = 'in',
+	IN = 'IN',
 	/** 不包含 */
-	NOT_IN = 'not in',
+	NOT_IN = 'NOT IN',
 	/** 大于等于 */
 	GE = '>=',
 	/** 小于等于 */
 	LE = '<=',
 }
+
+/** sql 排序规则 */
+export enum SQLOrder {
+	ASC = 'ASC',
+	DESC = 'DESC',
+}
+
+/** 查询总数的字段 */
+export const CountFieldId = 'count';

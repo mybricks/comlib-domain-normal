@@ -8,7 +8,10 @@ export default function ({env, data, outputs, inputs, onError}) {
 			conditions: data.selector.conditions || [],
 			entities,
 			params: {},
-			limit: data.selector.limit
+			limit: data.selector.limit,
+			orders: data.selector.orders,
+			pageIndex: data.selector.pageIndex,
+			originEntities: data.selector.originEntities,
 		});
 		
     if (sql) {
@@ -20,12 +23,15 @@ export default function ({env, data, outputs, inputs, onError}) {
     }
   }
 
-  inputs['params']((val, relOutpus) => {
+  inputs['params']((val) => {
     let sql = spliceSelectSQLByConditions({
 	    conditions: data.selector.conditions || [],
 	    entities,
 	    params: val,
-	    limit: data.selector.limit
+	    limit: data.selector.limit,
+	    orders: data.selector.orders,
+	    pageIndex: data.selector.pageIndex,
+	    originEntities: data.selector.originEntities,
     });
 		
     if (sql) {

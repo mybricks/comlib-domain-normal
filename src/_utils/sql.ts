@@ -1,15 +1,16 @@
-import { Condition, Entity } from '../_types/domain';
-import { SQLWhereJoiner } from '../_constants/field';
+import {Condition, Entity, Order} from '../_types/domain';
+import {CountFieldId, SQLWhereJoiner} from '../_constants/field';
 import { getValueByOperatorAndFieldType } from './field';
 
 /** 根据条件拼接 where sql */
 export const spliceWhereSQLByConditions = (fnParams: {
 	conditions: Condition[];
 	entities: Entity[];
+	originEntities: Entity[];
 	params: Record<string, unknown>;
 	whereJoiner?: SQLWhereJoiner;
 }) => {
-	const { conditions, entities, params, whereJoiner } = fnParams;
+	const { conditions, entities, params, whereJoiner, originEntities } = fnParams;
 	const curConditions = conditions
 		.filter(condition => condition.fieldId)
 		/** 筛选使用变量时，变量不存在的条件 */
@@ -41,9 +42,15 @@ export const spliceWhereSQLByConditions = (fnParams: {
 		}
 		
 		if (condition.conditions) {
-			sql += spliceWhereSQLByConditions({ conditions: condition.conditions, entities, whereJoiner: condition.whereJoiner, params });
+			sql += spliceWhereSQLByConditions({
+				conditions: condition.conditions,
+				entities,
+				whereJoiner: condition.whereJoiner,
+				params,
+				originEntities,
+			});
 		} else {
-			const field = entities.find(e => e.id === condition.entityId)?.fieldAry.find(f => f.id === condition.fieldId);
+			const field = originEntities.find(e => e.id === condition.entityId)?.fieldAry.find(f => f.id === condition.fieldId);
 			
 			if (field) {
 				let value = condition.value || '';
@@ -72,19 +79,29 @@ export const spliceWhereSQLByConditions = (fnParams: {
 
 /** 根据规则以及实体拼接 select 语句 */
 export const spliceSelectSQLByConditions = (fnParams: {
+	orders: Order[];
 	conditions: Condition;
 	entities: Entity[];
+	originEntities: Entity[];
 	params: Record<string, unknown>;
 	limit: number;
+	pageIndex: string;
 }) => {
-	const { conditions, entities, params, limit } = fnParams;
+	const { conditions, entities, params, limit, orders, pageIndex, originEntities } = fnParams;
 	
 	if (entities.length) {
 		const sql: string[] = [];
 		let fieldList: string[] = [];
+		
 		/** 字段列表 */
 		entities.forEach((entity) => {
-			fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
+			const countField = entity.fieldAry.find(field => field.id === CountFieldId);
+			
+			if (countField) {
+				fieldList.push(`COUNT(*) as ${countField.name}`);
+			} else {
+				fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
+			}
 		}, []);
 		
 		/** 前置 sql */
@@ -93,8 +110,26 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			conditions: [conditions],
 			entities,
 			params,
+			originEntities,
 		}));
+		
+		if (orders.length) {
+			sql.push(`ORDER BY ${orders.map(o => o.fieldName).join(', ')}`)
+		}
+		
 		sql.push(`LIMIT ${limit}`);
+		
+		if (pageIndex) {
+			if (pageIndex.startsWith('{') && pageIndex.endsWith('}')) {
+				const curValue = params[pageIndex.slice(pageIndex.indexOf('.')+1, -1)];
+				
+				if (curValue) {
+					sql.push(`OFFSET ${(Number(curValue) - 1) * Number(limit)}`);
+				}
+			} else if (!Number.isNaN(Number(pageIndex))) {
+				sql.push(`OFFSET ${(Number(pageIndex) - 1) * Number(limit)}`);
+			}
+		}
 		
 		return sql.join(' ');
 	}
