@@ -20,8 +20,12 @@ import updateRt from './dbUpdate/rt'
 import updateEditors from './dbUpdate/editors'
 
 import codeDef from './code-segment/com.json'
-import codeRt from './code-segment/rt'
+import codeRt from './code-segment/runtime';
 import codeEditors from './code-segment/editors'
+
+import mergeDef from './merge/com.json'
+import mergeRt from './merge/runtime';
+import mergeEditors from './merge/editors'
 
 const lib = {
   id: 'mybricks.comlib.domain',
@@ -49,6 +53,11 @@ const lib = {
       comDef: codeDef,
       rt: codeRt,
       editors: codeEditors
+    }),
+    merge({
+      comDef: mergeDef,
+      rt: mergeRt,
+      editors: mergeEditors
     })
   ],
   //visible: true,
