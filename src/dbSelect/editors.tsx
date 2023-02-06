@@ -26,7 +26,8 @@ export default {
         return {
           get paramSchema() {
             return input.get('params').schema || {};
-          }
+          },
+	        showPager: false
         }
       },
       value: {
@@ -36,7 +37,7 @@ export default {
         set({data, setDesc, outputs}, val) {
           data.selector = val;
 
-          if (data.selector.sql) {
+          if (data.selector) {
             setDesc(`已选择 ${data.selector.desc}`)
 
             outputs.get('rtn').setSchema({

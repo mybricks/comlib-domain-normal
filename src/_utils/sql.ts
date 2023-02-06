@@ -1,5 +1,5 @@
-import {Condition, Entity, Order} from '../_types/domain';
-import {CountFieldId, SQLWhereJoiner} from '../_constants/field';
+import { Condition, Entity, Order } from '../_types/domain';
+import { SQLWhereJoiner } from '../_constants/field';
 import { getValueByOperatorAndFieldType } from './field';
 
 /** 根据条件拼接 where sql */
@@ -13,19 +13,21 @@ export const spliceWhereSQLByConditions = (fnParams: {
 	const { conditions, entities, params, whereJoiner, originEntities } = fnParams;
 	const curConditions = conditions
 		.filter(condition => condition.fieldId)
-		/** 筛选使用变量时，变量不存在的条件 */
+		/** 筛选条件对应值不存在的情况 */
 		.filter(condition => {
 			if (condition.conditions) {
 				return true;
 			} else {
 				/** 变量 */
-				if (condition.checkExist && condition.value.startsWith('{') && condition.value.endsWith('}')) {
+				if (condition.value?.startsWith('{') && condition.value?.endsWith('}')) {
 					const curValue = condition.value.substr(1, condition.value.length - 2);
 					
 					/** 非实体字段，即使用的变量，如 params.id */
 					if (!new RegExp(`^${entities.map(e => e.name).join('|')}\\.`).test(curValue)) {
 						return params[curValue.substring(curValue.indexOf('.')+1)] !== undefined;
 					}
+				} else {
+					return condition?.value !== undefined;
 				}
 			}
 			
@@ -95,13 +97,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		
 		/** 字段列表 */
 		entities.forEach((entity) => {
-			const countField = entity.fieldAry.find(field => field.id === CountFieldId);
-			
-			if (countField) {
-				fieldList.push(`COUNT(*) as ${countField.name}`);
-			} else {
-				fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
-			}
+			fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
 		}, []);
 		
 		/** 前置 sql */
