@@ -20,12 +20,16 @@ import updateRt from './dbUpdate/rt'
 import updateEditors from './dbUpdate/editors'
 
 import codeDef from './code-segment/com.json'
-import codeRt from './code-segment/runtime';
+import codeRt from './code-segment/rt';
 import codeEditors from './code-segment/editors'
 
 import mergeDef from './merge/com.json'
-import mergeRt from './merge/runtime';
+import mergeRt from './merge/rt';
 import mergeEditors from './merge/editors'
+
+import selectPagerDef from './dbSelectByPager/com.json'
+import selectPagerRt from './dbSelectByPager/rt';
+import selectPagerEditors from './dbSelectByPager/editors';
 
 const lib = {
   id: 'mybricks.comlib.domain',
@@ -58,6 +62,11 @@ const lib = {
       comDef: mergeDef,
       rt: mergeRt,
       editors: mergeEditors
+    }),
+    merge({
+      comDef: selectPagerDef,
+      rt: selectPagerRt,
+      editors: selectPagerEditors
     })
   ],
   //visible: true,

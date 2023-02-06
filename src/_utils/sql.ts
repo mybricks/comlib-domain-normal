@@ -76,7 +76,7 @@ export const spliceWhereSQLByConditions = (fnParams: {
 	
 	sql += curConditions.length > 1 ? ')' : '';
 	
-	return (!whereJoiner ? 'WHERE ' : '') +  sql;
+	return (sql && !whereJoiner ? 'WHERE ' : '') +  sql;
 };
 
 /** 根据规则以及实体拼接 select 语句 */
@@ -87,7 +87,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	originEntities: Entity[];
 	params: Record<string, unknown>;
 	limit: number;
-	pageIndex: string;
+	pageIndex?: string;
 }) => {
 	const { conditions, entities, params, limit, orders, pageIndex, originEntities } = fnParams;
 	
@@ -126,6 +126,31 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				sql.push(`OFFSET ${(Number(pageIndex) - 1) * Number(limit)}`);
 			}
 		}
+		
+		return sql.join(' ');
+	}
+};
+
+/** 根据规则以及实体拼接 select 查询总数语句 */
+export const spliceSelectCountSQLByConditions = (fnParams: {
+	conditions: Condition;
+	entities: Entity[];
+	originEntities: Entity[];
+	params: Record<string, unknown>;
+}) => {
+	const { conditions, entities, params, originEntities } = fnParams;
+	
+	if (entities.length) {
+		const sql: string[] = [];
+		
+		/** 前置 sql */
+		sql.push(`SELECT count(*) as total FROM ${entities.map(entity => entity.name).join(', ')}`);
+		sql.push(spliceWhereSQLByConditions({
+			conditions: [conditions],
+			entities,
+			params,
+			originEntities,
+		}));
 		
 		return sql.join(' ');
 	}

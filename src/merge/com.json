@@ -7,7 +7,7 @@
   "author": "MyBricks",
   "author_name": "MyBricks",
   "data": "./data.json",
-  "runtime": "./runtime.ts",
+  "runtime": "./rt.ts",
   "editors": "./editors.ts",
   "icon": "./icon.svg",
   "inputs": [
