@@ -4,7 +4,8 @@
     "./src/dbInsert/com.json",
     "./src/code-segment/com.json",
     "./src/merge/com.json",
-    "./src/dbSelectByPager/com.json"
+    "./src/dbSelectByPager/com.json",
+    "./src/dbChatGpt/com.json"
   ],
   "target": "node"
 }
