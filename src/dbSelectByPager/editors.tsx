@@ -41,7 +41,11 @@ export default {
             setDesc(`已选择 ${data.selector.desc}`)
 
             outputs.get('rtn').setSchema({
-              type: 'array'
+              type: 'object',
+	            properties: {
+								total: { type: 'number' },
+								list: { type: 'array' },
+	            },
             })
           } else {
             setDesc(`未完成选择`)

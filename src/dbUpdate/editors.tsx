@@ -26,8 +26,8 @@ export default {
         set({data, setDesc, outputs}, val) {
           data.rules = val
 
-          if (data.rules.sql) {
-            setDesc(`已选择 ${data.selector.desc}`)
+          if (data.rules) {
+            setDesc(`已选择 ${data.rules.desc}`)
           } else {
             setDesc(`未完成选择`)
           }

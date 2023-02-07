@@ -31,6 +31,10 @@ import selectPagerDef from './dbSelectByPager/com.json'
 import selectPagerRt from './dbSelectByPager/rt';
 import selectPagerEditors from './dbSelectByPager/editors';
 
+import deleteDef from './dbDelete/com.json'
+import deleteRt from './dbDelete/rt';
+import deleteEditors from './dbDelete/editors';
+
 const lib = {
   id: 'mybricks.comlib.domain',
   title: '领域模型组件库',
@@ -53,6 +57,16 @@ const lib = {
       rt: updateRt,
       editors: updateEditors
     }),
+	  merge({
+		  comDef: selectPagerDef,
+		  rt: selectPagerRt,
+		  editors: selectPagerEditors
+	  }),
+	  merge({
+		  comDef: deleteDef,
+		  rt: deleteRt,
+		  editors: deleteEditors
+	  }),
     merge({
       comDef: codeDef,
       rt: codeRt,
@@ -63,11 +77,6 @@ const lib = {
       rt: mergeRt,
       editors: mergeEditors
     }),
-    merge({
-      comDef: selectPagerDef,
-      rt: selectPagerRt,
-      editors: selectPagerEditors
-    })
   ],
   //visible: true,
   visible: false//TODO

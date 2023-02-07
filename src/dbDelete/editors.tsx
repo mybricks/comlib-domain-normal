@@ -11,23 +11,23 @@ export default {
   ':root': [
     {
       title: '编辑',
-      type: 'domain.dbInsert',
+      type: 'domain.dbDelete',
       options({data, input, output}) {
         return {
           get paramSchema() {
-            return input.get('params').schema || {};
+            return input.get('params').schema;
           }
-        }
+        };
       },
       value: {
         get({data, input, output}) {
-          return data.rules
+          return data.selector
         },
         set({data, setDesc, outputs}, val) {
-          data.rules = val
+          data.selector = val
 
-          if (data.rules) {
-            setDesc(`已选择 ${data.rules.desc}`)
+          if (data.selector) {
+            setDesc(`已选择 ${data.selector.desc}`)
           } else {
             setDesc(`未完成选择`)
           }

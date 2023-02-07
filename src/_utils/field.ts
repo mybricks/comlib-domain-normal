@@ -74,7 +74,7 @@ export const getQuoteByFieldType = (dbType: string) => {
 	}
 };
 
-/** 根据字段类型返回拼接 sql 的具体指 */
+/** 根据字段类型返回拼接 sql 的具体值 */
 export const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
 	case FieldDBType.VARCHAR: return `'${val}'`;
@@ -84,7 +84,7 @@ export const getValueByFieldType = (dbType: string, val: string) => {
 	}
 };
 
-/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
+/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 export const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 	if (operator === SQLOperator.LIKE || operator === SQLOperator.NOT_LIKE) {
 		return `'%${val}%'`;

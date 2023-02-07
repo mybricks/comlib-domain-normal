@@ -1,11 +1,13 @@
 import { Condition, Entity, Order } from '../_types/domain';
 import { SQLWhereJoiner } from '../_constants/field';
-import { getValueByOperatorAndFieldType } from './field';
+import { getValueByFieldType, getValueByOperatorAndFieldType } from './field';
+import { AnyType } from '../_types';
 
 /** 根据条件拼接 where sql */
-export const spliceWhereSQLByConditions = (fnParams: {
+export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	conditions: Condition[];
 	entities: Entity[];
+	/** entities 是 originEntities 的子集 */
 	originEntities: Entity[];
 	params: Record<string, unknown>;
 	whereJoiner?: SQLWhereJoiner;
@@ -44,7 +46,7 @@ export const spliceWhereSQLByConditions = (fnParams: {
 		}
 		
 		if (condition.conditions) {
-			sql += spliceWhereSQLByConditions({
+			sql += spliceWhereSQLFragmentByConditions({
 				conditions: condition.conditions,
 				entities,
 				whereJoiner: condition.whereJoiner,
@@ -79,6 +81,29 @@ export const spliceWhereSQLByConditions = (fnParams: {
 	return (sql && !whereJoiner ? 'WHERE ' : '') +  sql;
 };
 
+/** 拼接 update 语句设置值的 sql */
+export const spliceUpdateSQLFragmentByConditions = (fnParams: {
+	connectors: Array<{ from: string; to: string }>;
+	entity: Entity;
+	params: Record<string, unknown>;
+}) => {
+	const { connectors, entity, params } = fnParams;
+	return connectors
+		.map(connector => {
+			const { from, to } = connector;
+			const toFieldName = to.replace('/', '');
+			const field = entity.fieldAry.find(f => f.name === toFieldName);
+			const fromNames = from.split('/').filter(Boolean);
+			
+			let value = params;
+			fromNames.forEach(key => value = value[key] as AnyType);
+			
+			return field ? `${to} = ${getValueByFieldType(field.dbType, value as unknown as string)}` : undefined;
+		})
+		.filter(Boolean)
+		.join(', ');
+};
+
 /** 根据规则以及实体拼接 select 语句 */
 export const spliceSelectSQLByConditions = (fnParams: {
 	orders: Order[];
@@ -102,7 +127,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		
 		/** 前置 sql */
 		sql.push(`SELECT ${fieldList.join(', ')} FROM ${entities.map(entity => entity.name).join(', ')}`);
-		sql.push(spliceWhereSQLByConditions({
+		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
 			params,
@@ -145,11 +170,67 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		
 		/** 前置 sql */
 		sql.push(`SELECT count(*) as total FROM ${entities.map(entity => entity.name).join(', ')}`);
-		sql.push(spliceWhereSQLByConditions({
+		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
 			params,
 			originEntities,
+		}));
+		
+		return sql.join(' ');
+	}
+};
+
+/** 根据规则以及实体拼接 update 语句 */
+export const spliceUpdateSQLByConditions = (fnParams: {
+	conditions: Condition;
+	connectors: Array<{ from: string; to: string }>;
+	entities: Entity[];
+	params: Record<string, unknown>;
+}) => {
+	const { conditions, entities, params, connectors } = fnParams;
+	const entity = entities[0];
+	
+	if (entity) {
+		const sql: string[] = [];
+		
+		/** 前置 sql */
+		sql.push(`UPDATE ${entity.name} SET`);
+		sql.push(spliceUpdateSQLFragmentByConditions({
+			connectors,
+			entity,
+			params,
+		}));
+		sql.push(spliceWhereSQLFragmentByConditions({
+			conditions: [conditions],
+			entities,
+			params,
+			originEntities: entities,
+		}));
+		
+		return sql.join(' ');
+	}
+};
+
+/** 根据规则以及实体拼接 delete 语句 */
+export const spliceDeleteSQLByConditions = (fnParams: {
+	conditions: Condition;
+	entities: Entity[];
+	params: Record<string, unknown>;
+}) => {
+	const { conditions, entities, params } = fnParams;
+	const entity = entities[0];
+	
+	if (entity) {
+		const sql: string[] = [];
+		
+		/** 前置 sql */
+		sql.push(`DELETE FROM ${entity.name}`);
+		sql.push(spliceWhereSQLFragmentByConditions({
+			conditions: [conditions],
+			entities,
+			params,
+			originEntities: entities,
 		}));
 		
 		return sql.join(' ');

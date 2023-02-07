@@ -1,4 +1,4 @@
-import {spliceSelectSQLByConditions, spliceWhereSQLByConditions} from "../_utils/sql";
+import { spliceSelectSQLByConditions } from "../_utils/sql";
 
 export default function ({env, data, outputs, inputs, onError}) {
 	const entities = data.selector?.entities ?? [];
