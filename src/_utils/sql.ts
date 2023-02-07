@@ -98,7 +98,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			let value = params;
 			fromNames.forEach(key => value = value[key] as AnyType);
 			
-			return field ? `${to} = ${getValueByFieldType(field.dbType, value as unknown as string)}` : undefined;
+			return field ? `${toFieldName} = ${getValueByFieldType(field.dbType, value as unknown as string)}` : undefined;
 		})
 		.filter(Boolean)
 		.join(', ');
@@ -234,5 +234,38 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		}));
 		
 		return sql.join(' ');
+	}
+};
+
+/** 根据规则以及实体拼接 insert 语句 */
+export const spliceInsertSQLByConditions = (fnParams: {
+	connectors: Array<{ from: string; to: string }>;
+	entities: Entity[];
+	params: Record<string, unknown>;
+}) => {
+	const { entities, params, connectors } = fnParams;
+	const entity = entities[0];
+	
+	if (entity) {
+		const fieldNames: string[] = [];
+		const values: string[] = [];
+		
+		connectors
+		.forEach(connector => {
+			const { from, to } = connector;
+			const toFieldName = to.replace('/', '');
+			const field = entity.fieldAry.find(f => f.name === toFieldName);
+			
+			if (field) {
+				const fromNames = from.split('/').filter(Boolean);
+				let value = params;
+				
+				fromNames.forEach(key => value = value[key] as AnyType);
+				fieldNames.push('`' + toFieldName + '`');
+				values.push(getValueByFieldType(field.dbType, value as unknown as string));
+			}
+		});
+		
+		return `INSERT INTO ${entity.name} (${fieldNames.join(', ')}) VALUES (${values.join(', ')})`;
 	}
 };

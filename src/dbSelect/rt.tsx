@@ -2,6 +2,9 @@ import { spliceSelectSQLByConditions } from "../_utils/sql";
 
 export default function ({env, data, outputs, inputs, onError}) {
 	const entities = data.selector?.entities ?? [];
+	if (data.selector) {
+		return;
+	}
 	
   if (data.autoRun) {
 		const sql = spliceSelectSQLByConditions({

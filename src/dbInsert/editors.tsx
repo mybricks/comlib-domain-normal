@@ -21,15 +21,15 @@ export default {
       },
       value: {
         get({data, input, output}) {
-          return data.rules
+          return data.rules;
         },
         set({data, setDesc, outputs}, val) {
-          data.rules = val
+          data.rules = val;
 
           if (data.rules) {
-            setDesc(`已选择 ${data.rules.desc}`)
+            setDesc(`已选择 ${data.rules.desc}`);
           } else {
-            setDesc(`未完成选择`)
+            setDesc(`未完成选择`);
           }
         }
       }
