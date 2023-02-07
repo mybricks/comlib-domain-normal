@@ -8,7 +8,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 	
   if (data.autoRun) {
 		const sql = spliceSelectSQLByConditions({
-			conditions: data.selector.conditions || [],
+			conditions: data.selector.conditions,
 			entities,
 			params: {},
 			limit: data.selector.limit,

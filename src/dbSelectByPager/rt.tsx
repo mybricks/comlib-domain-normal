@@ -19,6 +19,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 			conditions: data.selector.conditions || [],
 			entities,
 			params: {},
+			orders: data.selector.orders || [],
 			originEntities: data.selector.originEntities,
 		});
 		
@@ -50,6 +51,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 		  conditions: data.selector.conditions || [],
 		  entities,
 		  params: val,
+		  orders: data.selector.orders || [],
 		  originEntities: data.selector.originEntities,
 	  });
 		

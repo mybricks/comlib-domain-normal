@@ -1,7 +1,7 @@
-import { Condition, Entity, Order } from '../_types/domain';
-import { SQLWhereJoiner } from '../_constants/field';
-import { getValueByFieldType, getValueByOperatorAndFieldType } from './field';
-import { AnyType } from '../_types';
+import {Condition, Entity, Order} from '../_types/domain';
+import {FieldBizType, SQLWhereJoiner} from '../_constants/field';
+import {getValueByFieldType, getValueByOperatorAndFieldType} from './field';
+import {AnyType} from '../_types';
 
 /** 根据条件拼接 where sql */
 export const spliceWhereSQLFragmentByConditions = (fnParams: {
@@ -77,8 +77,49 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	});
 	
 	sql += curConditions.length > 1 ? ')' : '';
+	let prefix = '';
 	
-	return (sql && !whereJoiner ? 'WHERE ' : '') +  sql;
+	/** 最外层 sql */
+	if (sql && !whereJoiner) {
+		prefix = 'WHERE ';
+		const noRelationEntities = entities.filter(entity => !entity.isRelationEntity);
+		const relationEntities = entities.filter(entity => entity.isRelationEntity);
+		
+		/** 根据所选择的表，计算需要关联的实体 where 语句 */
+		noRelationEntities.forEach(entity => {
+			const relationFields = entity.fieldAry.filter(field => field.bizType === FieldBizType.RELATION);
+			
+			relationFields.forEach(field => {
+				const relationEntity = relationEntities.find(e => e.id === field.relationEntityId);
+				
+				if (relationEntity) {
+					prefix += `${entity.name}.${field.name} = ${relationEntity.name}.id AND `;
+				}
+			});
+		})
+	}
+	
+	return prefix +  sql;
+};
+
+/** 获取 select 查询条件中的实体表 ID 列表 */
+const getEntityIdsByConditions = (conditions: Condition[]) => {
+	const preEntityIds: string[] = [];
+	
+	conditions
+		.forEach(condition => {
+			if (condition.conditions) {
+				return preEntityIds.push(...getEntityIdsByConditions(condition.conditions));
+			} else {
+				return preEntityIds.push(condition.entityId);
+			}
+		});
+	
+	return preEntityIds;
+};
+/** 获取 select 排序中的实体表 ID 列表 */
+const getEntityIdsByOrders = (orders: Order[]) => {
+	return orders.filter(order => order.fieldId).map(order => order.entityId);
 };
 
 /** 拼接 update 语句设置值的 sql */
@@ -114,11 +155,23 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	limit: number;
 	pageIndex?: string;
 }) => {
-	const { conditions, entities, params, limit, orders, pageIndex, originEntities } = fnParams;
+	let { conditions, entities, params, limit, orders, pageIndex, originEntities } = fnParams;
 	
 	if (entities.length) {
 		const sql: string[] = [];
 		let fieldList: string[] = [];
+		const entityIds = Array.from(
+			new Set(
+				[
+					...getEntityIdsByConditions([conditions]),
+					...entities.filter(entity => entity.fieldAry.length).map(entity => entity.id),
+					...getEntityIdsByOrders(orders),
+				]
+			)
+		);
+		
+		entities = entities.filter(entity => entityIds.includes(entity.id));
+		orders = orders.filter(order => order.fieldId);
 		
 		/** 字段列表 */
 		entities.forEach((entity) => {
@@ -160,13 +213,25 @@ export const spliceSelectSQLByConditions = (fnParams: {
 export const spliceSelectCountSQLByConditions = (fnParams: {
 	conditions: Condition;
 	entities: Entity[];
+	orders: Order[];
 	originEntities: Entity[];
 	params: Record<string, unknown>;
 }) => {
-	const { conditions, entities, params, originEntities } = fnParams;
+	let { conditions, entities, params, originEntities, orders } = fnParams;
 	
 	if (entities.length) {
 		const sql: string[] = [];
+		const entityIds = Array.from(
+			new Set(
+				[
+					...getEntityIdsByConditions([conditions]),
+					...entities.filter(entity => entity.fieldAry.length).map(entity => entity.id),
+					...getEntityIdsByOrders(orders),
+				]
+			)
+		);
+		
+		entities = entities.filter(entity => entityIds.includes(entity.id));
 		
 		/** 前置 sql */
 		sql.push(`SELECT count(*) as total FROM ${entities.map(entity => entity.name).join(', ')}`);
