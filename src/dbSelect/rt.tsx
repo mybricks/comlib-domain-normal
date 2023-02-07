@@ -13,7 +13,6 @@ export default function ({env, data, outputs, inputs, onError}) {
 			params: {},
 			limit: data.selector.limit,
 			orders: data.selector.orders,
-			pageIndex: data.selector.pageIndex,
 			originEntities: data.selector.originEntities,
 		});
 		
@@ -33,7 +32,6 @@ export default function ({env, data, outputs, inputs, onError}) {
 	    params: val,
 	    limit: data.selector.limit,
 	    orders: data.selector.orders,
-	    pageIndex: data.selector.pageIndex,
 	    originEntities: data.selector.originEntities,
     });
 		
