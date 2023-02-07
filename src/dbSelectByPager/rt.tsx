@@ -2,7 +2,7 @@ import {spliceSelectSQLByConditions, spliceSelectCountSQLByConditions} from "../
 
 export default function ({env, data, outputs, inputs, onError}) {
 	const entities = data.selector?.entities ?? [];
-	if (data.selector) {
+	if (!data.selector) {
 		return;
 	}
 	

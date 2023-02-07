@@ -2,7 +2,7 @@ import { spliceInsertSQLByConditions } from '../_utils/sql';
 
 export default function ({env, data, outputs, inputs, onError}) {
   inputs['params']((val, relOutpus) => {
-	  if (data.rules) {
+	  if (!data.rules) {
 		  return;
 	  }
 		
