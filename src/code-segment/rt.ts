@@ -1,4 +1,4 @@
-import { runJs } from '../com-utils';
+// import { runJs } from '../com-utils';
 import { Data } from './constants';
 
 const getFnString = (fnBody: string, fnParams: string[]) => {
@@ -13,12 +13,12 @@ export default function ({ env, data, inputs, outputs, logger, onError }: Runtim
   try {
     if (runImmediate) {
       if (env.runtime) {
-        runJs(fns, [runJSParams]);
+	      eval(decodeURIComponent(fns))(runJSParams);
       }
     }
     inputs.input0((val: any) => {
       try {
-        runJs(fns, [{ ...runJSParams, inputValue: val }]);
+	      eval(decodeURIComponent(fns))({ ...runJSParams, inputValue: val });
       } catch (ex) {
         onError?.(ex);
         console.error('js计算组件运行错误.', ex);
