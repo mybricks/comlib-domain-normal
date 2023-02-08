@@ -26,6 +26,13 @@ export interface Field {
 	relationEntityId?: string;
 	/** 是否为主键 */
 	isPrimaryKey?: boolean;
+	mapping?: {
+		condition: string;
+		fieldJoiner: string;
+		entity?: Omit<Entity, 'fieldAry'> & { field: Field };
+		sql: string;
+		desc: string;
+	};
 }
 
 export interface Condition {

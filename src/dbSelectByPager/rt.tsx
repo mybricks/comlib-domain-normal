@@ -54,6 +54,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 		  orders: data.selector.orders || [],
 		  originEntities: data.selector.originEntities,
 	  });
+	  console.log('executeSql 执行前传入的 SQL: ', sql);
 		
     if (sql) {
 	    Promise.all([env.executeSql(sql), env.executeSql(countSql)])
