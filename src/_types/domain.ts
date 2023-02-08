@@ -30,6 +30,7 @@ export interface Field {
 		condition: string;
 		fieldJoiner: string;
 		entity?: Omit<Entity, 'fieldAry'> & { field: Field };
+		type?: string;
 		sql: string;
 		desc: string;
 	};

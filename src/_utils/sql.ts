@@ -1,4 +1,4 @@
-import {Condition, Entity, Order} from '../_types/domain';
+import {Condition, Entity, Field, Order} from '../_types/domain';
 import {FieldBizType, SQLWhereJoiner} from '../_constants/field';
 import {getValueByFieldType, getValueByOperatorAndFieldType} from './field';
 import {AnyType} from '../_types';
@@ -89,11 +89,20 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 		});
 		
 		mappingFields.forEach(mappingField => {
-			/** 与主实体存在关联关系的外键字段 */
-			const relationField = originEntities.find(e => e.id === mappingField.mapping!.entity!.id)?.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entity.id);
-			
-			if (relationField) {
-				prefix += `MAPPING_${mappingField.name}.${relationField.name} = ${entity.name}.id AND `;
+			/** 被关联 */
+			if (mappingField.mapping?.type === 'primary') {
+				const relationField = entity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === mappingField.mapping?.entity?.id);
+				
+				if (relationField) {
+					prefix += `MAPPING_${mappingField.name}.id = ${entity.name}.${relationField.name} AND `;
+				}
+			} else {
+				/** 与主实体存在关联关系的外键字段 */
+				const relationField = originEntities.find(e => e.id === mappingField.mapping!.entity!.id)?.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entity.id);
+				
+				if (relationField) {
+					prefix += `MAPPING_${mappingField.name}.${relationField.name} = ${entity.name}.id AND `;
+				}
 			}
 		});
 	}
@@ -177,7 +186,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 }) => {
 	let { conditions, entities, params, limit, orders, pageIndex, originEntities } = fnParams;
 	
-	if (entities.length) {
+	if (entities.length && entities[0].fieldAry?.length) {
 		const sql: string[] = [];
 		const fieldList: string[] = [];
 		const entityNames: string[] = [entities[0].name];
@@ -201,6 +210,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
 			const condition = mappingField.mapping!.condition!;
+			const type = mappingField.mapping!.type!;
 			const fieldJoiner = mappingField.mapping!.fieldJoiner!;
 			
 			/** 源实体，即实体面板中存在的实体 */
@@ -213,7 +223,12 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			// const curFields = [entity.field];
 			
 			/** 与主实体存在关联关系的外键字段 */
-			const relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entities[0].id);
+			let relationField: Field | null = null;
+			if (type === 'primary') {
+				relationField = originEntity.fieldAry.find(f => f.name === 'id') ?? null;
+			} else {
+				relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entities[0].id) ?? null;
+			}
 			
 			if (!relationField) {
 				return;
@@ -221,13 +236,20 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			
 			const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
 			let entityName = '';
-			
-			if (condition === '-1') {
-				entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, GROUP_CONCAT(${entity.field.name} SEPARATOR '${fieldJoiner}') ${entity.field.name} FROM ${originEntity.name} GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
-			} else if (isMaxCondition) {
-				const filedName = condition.substr(4, condition.length - 5);
-				
-				entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name} WHERE ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+			/** 被关联 */
+			if (type === 'primary') {
+				if (condition === '-1') {
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
+				}
+			} else {
+				/** 关联 */
+				if (condition === '-1') {
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, GROUP_CONCAT(${entity.field.name} SEPARATOR '${fieldJoiner}') ${entity.field.name} FROM ${originEntity.name} GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+				} else if (isMaxCondition) {
+					const filedName = condition.substr(4, condition.length - 5);
+					
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name} WHERE ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+				}
 			}
 			
 			entityNames.push(entityName);
@@ -315,22 +337,77 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 }) => {
 	let { conditions, entities, params, originEntities, orders } = fnParams;
 	
-	if (entities.length) {
+	if (entities.length && entities[0].fieldAry?.length) {
 		const sql: string[] = [];
-		const entityIds = Array.from(
-			new Set(
-				[
-					...getEntityIdsByConditions([conditions]),
-					...entities.filter(entity => entity.fieldAry.length).map(entity => entity.id),
-					...getEntityIdsByOrders(orders),
-				]
-			)
-		);
+		const entityNames: string[] = [entities[0].name];
 		
-		entities = entities.filter(entity => entityIds.includes(entity.id));
+		orders = orders.filter(order => order.fieldId);
+		
+		/** mapping 字段，存在映射且实体存在 */
+		const mappingFields = entities[0].fieldAry.filter(field => {
+			return field.bizType === FieldBizType.MAPPING && field.mapping && originEntities.find(entity => entity.id === field.mapping?.entity?.id);
+		});
+		// /** 去重查询使用 mapping 依赖实体中的字段ID */
+		// const mappingFieldIdsOfEntity = Array.from(
+		// 	new Set(
+		// 		[
+		// 			...getFieldIdIdsByConditionsAndEntityIds([conditions], mappingFields.map(field => field.mapping!.entity!.id)),
+		// 			...getFieldIdsByOrdersAndEntityIds(orders, mappingFields.map(field => field.mapping!.entity!.id))
+		// 		]
+		// 	)
+		// );
+		
+		mappingFields.forEach(mappingField => {
+			const entity = mappingField.mapping!.entity!;
+			const condition = mappingField.mapping!.condition!;
+			const type = mappingField.mapping!.type!;
+			const fieldJoiner = mappingField.mapping!.fieldJoiner!;
+			
+			/** 源实体，即实体面板中存在的实体 */
+			const originEntity = originEntities.find(e => e.id === entity.id)!;
+			// const curFields = [
+			// 	entity.field,
+			// 	/** 连表查询条件 */
+			// 	...originEntity.fieldAry.filter(f => mappingFieldIdsOfEntity.includes(f.id))
+			// ];
+			// const curFields = [entity.field];
+			
+			/** 与主实体存在关联关系的外键字段 */
+			let relationField: Field | null = null;
+			if (type === 'primary') {
+				relationField = originEntity.fieldAry.find(f => f.name === 'id') ?? null;
+			} else {
+				relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entities[0].id) ?? null;
+			}
+			
+			if (!relationField) {
+				return;
+			}
+			
+			const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
+			let entityName = '';
+			
+			/** 被关联 */
+			if (type === 'primary') {
+				if (condition === '-1') {
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
+				}
+			} else {
+				/** 关联 */
+				if (condition === '-1') {
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, GROUP_CONCAT(${entity.field.name} SEPARATOR '${fieldJoiner}') ${entity.field.name} FROM ${originEntity.name} GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+				} else if (isMaxCondition) {
+					const filedName = condition.substr(4, condition.length - 5);
+					
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name} WHERE ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+				}
+			}
+			
+			entityNames.push(entityName);
+		});
 		
 		/** 前置 sql */
-		sql.push(`SELECT count(*) as total FROM ${entities.map(entity => entity.name).join(', ')}`);
+		sql.push(`SELECT count(*) as total FROM ${entityNames.join(', ')}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,

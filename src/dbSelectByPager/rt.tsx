@@ -61,7 +61,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 	    .then(([data, countData]) => {
 		    outputs['rtn']({
 			    list: data.rows,
-			    total: countData.rows[0].total
+			    total: countData.rows[0]?.total
 		    })
 	    })
 	    .catch(ex => {
