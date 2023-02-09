@@ -1,46 +1,31 @@
 import { spliceSelectSQLByConditions } from "../_utils/sql";
 
-export default function ({env, data, outputs, inputs, onError}) {
-	const entities = data.selector?.entities ?? [];
-	if (!data.selector) {
-		return;
-	}
-	
+export default function ({ env, data, outputs, inputs, onError }) {
+  const entities = data.selector?.entities ?? [];
+  if (!data.selector) {
+    return;
+  }
+
+  let script = data.rules?.script;
+  if (!script) {
+    return
+  }
+
   if (data.autoRun) {
-		const sql = spliceSelectSQLByConditions({
-			conditions: data.selector.conditions,
-			entities,
-			params: {},
-			limit: data.selector.limit,
-			orders: data.selector.orders,
-			originEntities: data.selector.originEntities,
-		});
-		
-    if (sql) {
-      env.executeSql(sql).then(data => {
-        outputs['rtn'](data.rows)
-      }).catch(ex => {
-        onError(`执行SQL发生错误,${ex?.message}`)
-      })
-    }
+    const sql = eval(script)({})
+    env.executeSql(sql).then(data => {
+      outputs['rtn']()
+    }).catch(ex => {
+      onError(`执行SQL发生错误,${ex?.message}`)
+    })
   }
 
   inputs['params']((val) => {
-    let sql = spliceSelectSQLByConditions({
-	    conditions: data.selector.conditions || [],
-	    entities,
-	    params: val,
-	    limit: data.selector.limit,
-	    orders: data.selector.orders,
-	    originEntities: data.selector.originEntities,
-    });
-		
-    if (sql) {
-      env.executeSql(sql).then(data => {
-        outputs['rtn'](data.rows)
-      }).catch(ex => {
-        onError(`执行SQL发生错误,${ex?.message}`)
-      })
-    }
+    const sql = eval(script)(val)
+    env.executeSql(sql).then(data => {
+      outputs['rtn']()
+    }).catch(ex => {
+      onError(`执行SQL发生错误,${ex?.message}`)
+    })
   })
 }
