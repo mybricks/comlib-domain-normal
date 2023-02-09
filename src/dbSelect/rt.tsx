@@ -1,12 +1,9 @@
-import { spliceSelectSQLByConditions } from "../_utils/sql";
-
 export default function ({ env, data, outputs, inputs, onError }) {
-  const entities = data.selector?.entities ?? [];
   if (!data.selector) {
     return;
   }
 
-  let script = data.rules?.script;
+  let script = data.selector?.script;
   if (!script) {
     return
   }
