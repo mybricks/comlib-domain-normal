@@ -36,17 +36,13 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 			return true;
 		});
 	
-	/** 只有多个条件才需要括号拼接 */
-	let sql = curConditions.length > 1 ? '(' : '';
+	const conditionSqlList: string[] = [];
 	
-	curConditions.forEach((condition, index) => {
-		/** 非第一个条件 */
-		if (index > 0) {
-			sql += ` ${whereJoiner ?? ''} `;
-		}
+	curConditions.forEach(condition => {
+		let curSQL = '';
 		
 		if (condition.conditions) {
-			sql += spliceWhereSQLFragmentByConditions({
+			curSQL = spliceWhereSQLFragmentByConditions({
 				conditions: condition.conditions,
 				entities,
 				whereJoiner: condition.whereJoiner,
@@ -71,16 +67,23 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 					}
 				}
 				
-				sql += `${field.name} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
+				curSQL = `${field.name} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
 			}
 		}
+		
+		curSQL && conditionSqlList.push(curSQL);
 	});
 	
-	sql += curConditions.length > 1 ? ')' : '';
+	/** 只有多个条件才需要括号拼接 */
+	let sql = `${conditionSqlList.length > 1 ? '(' : ''}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ')' : ''}`;
 	let prefix = '';
+	/** mapping 字段，存在映射且实体存在 */
+	const mappingFields = entities[0].fieldAry.filter(field => {
+		return field.bizType === FieldBizType.MAPPING && field.mapping && originEntities.find(entity => entity.id === field.mapping?.entity?.id);
+	});
 	
-	/** 最外层 sql */
-	if (sql && !whereJoiner) {
+	/** whereJoiner 不存在表示最外层 SQL，当 condition 存在或者映射字段存在时 */
+	if ((sql || mappingFields.length) && !whereJoiner) {
 		prefix = 'WHERE ';
 		const entity = entities[0];
 		/** mapping 字段，存在映射且实体存在 */
@@ -88,20 +91,20 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 			return field.bizType === FieldBizType.MAPPING && field.mapping && originEntities.find(entity => entity.id === field.mapping?.entity?.id);
 		});
 		
-		mappingFields.forEach(mappingField => {
+		mappingFields.forEach((mappingField, index) => {
 			/** 被关联 */
 			if (mappingField.mapping?.type === 'primary') {
 				const relationField = entity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === mappingField.mapping?.entity?.id);
 				
 				if (relationField) {
-					prefix += `MAPPING_${mappingField.name}.id = ${entity.name}.${relationField.name} AND `;
+					prefix += `MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${entity.name}.${relationField.name} ${(sql || index < mappingFields.length - 1) ? 'AND ' : ''}`;
 				}
 			} else {
 				/** 与主实体存在关联关系的外键字段 */
 				const relationField = originEntities.find(e => e.id === mappingField.mapping!.entity!.id)?.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === entity.id);
 				
 				if (relationField) {
-					prefix += `MAPPING_${mappingField.name}.${relationField.name} = ${entity.name}.id AND `;
+					prefix += `MAPPING_${mappingField.name}.${relationField.name} = ${entity.name}.id ${(sql || index < mappingFields.length - 1) ? 'AND ' : ''}`;
 				}
 			}
 		});
@@ -239,7 +242,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
@@ -390,7 +393,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id as MAPPING_${mappingField.name}_id, ${entity.field.name} FROM ${originEntity.name}) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
