@@ -6,22 +6,14 @@ export default function ({env, data, outputs, inputs, onError}) {
 		return;
 	}
 	
+  let script = data.selector?.script;
+  if (!script) {
+    return
+  }
+
   if (data.autoRun) {
-		const sql = spliceSelectSQLByConditions({
-			conditions: data.selector.conditions || [],
-			entities,
-			params: {},
-			limit: data.selector.limit,
-			orders: data.selector.orders,
-			originEntities: data.selector.originEntities,
-		});
-		const countSql = spliceSelectCountSQLByConditions({
-			conditions: data.selector.conditions || [],
-			entities,
-			params: {},
-			orders: data.selector.orders || [],
-			originEntities: data.selector.originEntities,
-		});
+		const sql = eval(script.list)({})
+		const countSql = eval(script.total)({})
 		
     if (sql) {
       Promise.all([env.executeSql(sql), env.executeSql(countSql)])
@@ -38,22 +30,9 @@ export default function ({env, data, outputs, inputs, onError}) {
   }
 
   inputs['params']((val) => {
-    let sql = spliceSelectSQLByConditions({
-	    conditions: data.selector.conditions || [],
-	    entities,
-	    params: val,
-	    limit: data.selector.limit,
-	    orders: data.selector.orders,
-	    pageIndex: val.pageIndex,
-	    originEntities: data.selector.originEntities,
-    });
-	  const countSql = spliceSelectCountSQLByConditions({
-		  conditions: data.selector.conditions || [],
-		  entities,
-		  params: val,
-		  orders: data.selector.orders || [],
-		  originEntities: data.selector.originEntities,
-	  });
+		const sql = eval(script.list)(val)
+		const countSql = eval(script.total)(val)
+		
 	  console.log('executeSql 执行前传入的 SQL: ', sql);
 		
     if (sql) {

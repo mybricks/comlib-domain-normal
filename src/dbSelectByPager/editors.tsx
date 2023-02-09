@@ -27,7 +27,7 @@ export default {
           get paramSchema() {
             return input.get('params').schema || {};
           },
-	        showPager: false
+	        showPager: true
         }
       },
       value: {
