@@ -9,7 +9,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
   if (data.autoRun) {
     const sql = eval(script)({})
     env.executeSql(sql).then(data => {
-      outputs['rtn']()
+      outputs['rtn'](data)
     }).catch(ex => {
       onError(`执行SQL发生错误,${ex?.message}`)
     })
@@ -18,7 +18,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
   inputs['params']((val) => {
     const sql = eval(script)(val)
     env.executeSql(sql).then(data => {
-      outputs['rtn']()
+      outputs['rtn'](data);
     }).catch(ex => {
       onError(`执行SQL发生错误,${ex?.message}`)
     })
