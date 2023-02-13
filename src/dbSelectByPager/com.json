@@ -15,7 +15,7 @@
       "title": "参数",
       "schema": [
         {
-          "title": "页码",
+          "title": "分页参数",
           "name": "pageParams",
           "type": "object",
           "properties": {
