@@ -16,10 +16,10 @@ export default function ({env, data, outputs, inputs, onError}) {
 	        outputs['rtn']({
 		        list: data.rows,
 		        total: countData.rows[0].total
-	        })
+	        });
 	      })
         .catch(ex => {
-	        onError(`执行SQL发生错误,${ex?.message}`)
+	        onError(`执行SQL发生错误,${ex?.message}`);
 	      });
     }
   } else {
@@ -35,10 +35,10 @@ export default function ({env, data, outputs, inputs, onError}) {
 				  outputs['rtn']({
 					  list: data.rows,
 					  total: countData.rows[0]?.total
-				  })
+				  });
 			  })
 			  .catch(ex => {
-				  onError(`执行SQL发生错误,${ex?.message}`)
+				  onError(`执行SQL发生错误,${ex?.message}`);
 			  });
 		  }
 	  })
