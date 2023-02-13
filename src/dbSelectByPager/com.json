@@ -21,6 +21,9 @@
           "properties": {
             "pageIndex": {
               "type": "number"
+            },
+            "pageSize": {
+              "type": "number"
             }
           }
         },
