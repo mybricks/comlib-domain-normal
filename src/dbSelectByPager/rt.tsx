@@ -1,19 +1,14 @@
-import {spliceSelectSQLByConditions, spliceSelectCountSQLByConditions} from "../_utils/sql";
+import {safeDecodeURIComponent} from "../_utils/util";
 
 export default function ({env, data, outputs, inputs, onError}) {
-	const entities = data.selector?.entities ?? [];
-	if (!data.selector) {
-		return;
-	}
-	
   let script = data.selector?.script;
   if (!script) {
     return
   }
 
   if (data.autoRun) {
-		const sql = eval(script.list)({})
-		const countSql = eval(script.total)({})
+		const sql = eval(safeDecodeURIComponent(script.list))({})
+		const countSql = eval(safeDecodeURIComponent(script.total))({})
 		
     if (sql) {
       Promise.all([env.executeSql(sql), env.executeSql(countSql)])

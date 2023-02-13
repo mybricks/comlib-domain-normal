@@ -1,9 +1,7 @@
-export default function ({ env, data, outputs, inputs, onError }) {
-  if (!data.selector) {
-    return;
-  }
+import {safeDecodeURIComponent} from "../_utils/util";
 
-  let script = data.selector?.script;
+export default function ({ env, data, outputs, inputs, onError }) {
+  let script = safeDecodeURIComponent(data.selector?.script);
   if (!script) {
     return
   }
