@@ -22,25 +22,25 @@ export default function ({env, data, outputs, inputs, onError}) {
 	        onError(`执行SQL发生错误,${ex?.message}`)
 	      });
     }
-  }
-
-  inputs['params']((val) => {
-		const sql = eval(script.list)(val)
-		const countSql = eval(script.total)(val)
+  } else {
+	  inputs['params']((val, outputRels) => {
+		  const values = { ...(val.pageParams || {}), ...(val.params || {}) };
+		  const sql = eval(safeDecodeURIComponent(script.list))(values);
+		  const countSql = eval(safeDecodeURIComponent(script.total))(values);
 		
-	  console.log('executeSql 执行前传入的 SQL: ', sql);
-		
-    if (sql) {
-	    Promise.all([env.executeSql(sql), env.executeSql(countSql)])
-	    .then(([data, countData]) => {
-		    outputs['rtn']({
-			    list: data.rows,
-			    total: countData.rows[0]?.total
-		    })
-	    })
-	    .catch(ex => {
-		    onError(`执行SQL发生错误,${ex?.message}`)
-	    });
-    }
-  })
+		  console.log('executeSql 执行前传入的 SQL: ', sql);
+		  if (sql) {
+			  Promise.all([env.executeSql(sql), env.executeSql(countSql)])
+			  .then(([data, countData]) => {
+				  outputs['rtn']({
+					  list: data.rows,
+					  total: countData.rows[0]?.total
+				  })
+			  })
+			  .catch(ex => {
+				  onError(`执行SQL发生错误,${ex?.message}`)
+			  });
+		  }
+	  })
+	}
 }

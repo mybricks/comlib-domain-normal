@@ -25,7 +25,13 @@ export default {
       options({data, input, output}) {
         return {
           get paramSchema() {
-            return input.get('params').schema || {};
+						const computedParams = JSON.parse(JSON.stringify(input.get('params.params')?.schema ?? {}))
+	          computedParams.properties = {
+		          ...JSON.parse(JSON.stringify(input.get('params.pageParams')?.schema?.properties ?? {})),
+							...computedParams.properties,
+	          }
+						
+            return computedParams || {};
           },
 	        showPager: true
         }

@@ -13,9 +13,23 @@
     {
       "id": "params",
       "title": "参数",
-      "schema": {
-        "type": "follow"
-      },
+      "schema": [
+        {
+          "title": "页码",
+          "name": "pageParams",
+          "type": "object",
+          "properties": {
+            "pageIndex": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "title": "参数",
+          "name": "params",
+          "type": "follow"
+        }
+      ],
       "rels": [
         "rtn"
       ],
