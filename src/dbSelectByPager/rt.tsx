@@ -23,7 +23,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 	      });
     }
   } else {
-	  inputs['params']((val, outputRels) => {
+	  inputs['params'](([val,pageAbout], outputRels) => {
 		  const values = { ...(val.pageParams || {}), ...(val.params || {}) };
 		  const sql = eval(safeDecodeURIComponent(script.list))(values);
 		  const countSql = eval(safeDecodeURIComponent(script.total))(values);
