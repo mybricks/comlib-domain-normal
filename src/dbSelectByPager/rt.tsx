@@ -7,11 +7,11 @@ export default function ({env, data, outputs, inputs, onError}) {
   }
 
   if (data.autoRun) {
-		const sql = eval(safeDecodeURIComponent(script.list))({})
-		const countSql = eval(safeDecodeURIComponent(script.total))({})
-		
-    if (sql) {
-      Promise.all([env.executeSql(sql), env.executeSql(countSql)])
+    if (script.list) {
+      Promise.all([
+				eval(safeDecodeURIComponent(script.list))({}, env.executeSql),
+	      eval(safeDecodeURIComponent(script.total))({}, env.executeSql)
+      ])
 	      .then(([data, countData]) => {
 	        outputs['rtn']({
 		        list: data.rows,
@@ -23,18 +23,18 @@ export default function ({env, data, outputs, inputs, onError}) {
 	      });
     }
   } else {
-	  inputs['params'](([val,pageAbout], outputRels) => {
+	  inputs['params']((val, outputRels) => {
 		  const values = { ...(val.pageParams || {}), ...(val.params || {}) };
-		  const sql = eval(safeDecodeURIComponent(script.list))(values);
-		  const countSql = eval(safeDecodeURIComponent(script.total))(values);
-		
-		  console.log('executeSql 执行前传入的 SQL: ', sql);
-		  if (sql) {
-			  Promise.all([env.executeSql(sql), env.executeSql(countSql)])
+			
+		  if (script.list) {
+			  Promise.all([
+				  eval(safeDecodeURIComponent(script.list))(values, env.executeSql),
+				  eval(safeDecodeURIComponent(script.total))(values, env.executeSql)
+			  ])
 			  .then(([data, countData]) => {
 				  outputs['rtn']({
-					  list: data.rows,
-					  total: countData.rows[0]?.total
+					  list: data,
+					  total: countData[0]?.total
 				  });
 			  })
 			  .catch(ex => {

@@ -13,13 +13,26 @@
     {
       "id": "params",
       "title": "参数",
-      "wrap": {
-        "type": "_data_page"
-      },
-      "schema": {
-        "title": "参数",
-        "type": "follow"
-      },
+      "schema": [
+        {
+          "title": "分页参数",
+          "name": "pageParams",
+          "type": "object",
+          "properties": {
+            "pageIndex": {
+              "type": "number"
+            },
+            "pageSize": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "title": "参数",
+          "name": "params",
+          "type": "follow"
+        }
+      ],
       "rels": [
         "rtn"
       ],
