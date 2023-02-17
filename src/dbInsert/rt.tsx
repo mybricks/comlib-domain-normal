@@ -5,9 +5,9 @@ export default function ({env, data, outputs, inputs, onError}) {
 	  let script = safeDecodeURIComponent(data.rules?.script);
 		
 	  if (script) {
-		  const sql = eval(script)(val)
+		  const sql = eval(script)(val, env)
       env.executeSql(sql).then(data => {
-        outputs['rtn'](data.insertId)
+        outputs['rtn'](data.insertId || data.rows?.[0]?.insertId);
       }).catch(ex => {
         onError(`执行SQL发生错误,${ex?.message}`)
       })
