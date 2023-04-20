@@ -6,8 +6,15 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
+import {validateEntityForDelete} from "../_utils/validate";
 
 export default {
+	/** 环境发生变化 */
+	'@envChanged'({ data, env, type, throwError }) {
+		const error = validateEntityForDelete(data.rules.entities, env.entity, data.rules.conditions);
+		
+		error && throwError(error);
+	},
   ':root': [
     {
       title: '编辑',

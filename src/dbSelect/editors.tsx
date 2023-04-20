@@ -6,8 +6,21 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
+import {depValidateEntity} from "../_utils/validate";
 
 export default {
+	/** 环境发生变化 */
+	'@envChanged'({ data, env, type, throwError }) {
+		console.log('env', env.entity);
+		const error = depValidateEntity({
+			entities: data.selector.entities,
+			newEntity: env.entity,
+			fields: data.selector.fields,
+			conditions: data.selector.conditions
+		});
+		
+		error && throwError(error);
+	},
   '@init': ({data, isAutoRun, output, setDesc}) => {
     const autoRun = isAutoRun ? isAutoRun() : false;
     if (autoRun) {
@@ -36,8 +49,9 @@ export default {
         },
         set({data, setDesc, outputs}, val) {
           data.selector = val;
-
-          if (data.selector) {
+	        console.log(val);
+	
+	        if (data.selector) {
             setDesc(`已选择 ${data.selector.desc}`)
 
             outputs.get('rtn').setSchema({

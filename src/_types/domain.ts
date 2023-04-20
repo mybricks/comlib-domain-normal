@@ -1,4 +1,4 @@
-import {FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner} from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -8,8 +8,8 @@ export interface Entity {
 	/** 表备注 */
 	desc: string;
 	fieldAry: Field[];
-	/** 关联表，在 editor 中使用 */
-	isRelationEntity?: boolean;
+	/** 是否被选中 */
+	selected?: boolean;
 }
 
 export interface Field {
@@ -28,14 +28,23 @@ export interface Field {
 	isPrimaryKey?: boolean;
 	/** 私有字段 */
 	isPrivate?: boolean;
+	/** 是否被选中 */
+	selected?: boolean;
+	/** 映射 */
 	mapping?: {
 		condition: string;
 		fieldJoiner: string;
-		entity?: Omit<Entity, 'fieldAry'> & { field: Field };
+		entity?: Entity;
 		type?: string;
 		sql: string;
 		desc: string;
 	};
+	/** 默认值 */
+	defaultValueWhenCreate?: DefaultValueWhenCreate;
+	/** 查询数据时格式化类型 */
+	showFormat: string;
+	/** 枚举值 */
+	enumValues?: string[]
 }
 
 export interface Condition {
@@ -55,3 +64,13 @@ export interface Condition {
 }
 
 export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
+
+export interface SelectedField {
+	/** 字段 ID */
+	fieldId: string;
+	/** 字段名 */
+	fieldName: string;
+	/** 实体ID */
+	entityId: string;
+	fromPath: SelectedField[];
+}

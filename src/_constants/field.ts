@@ -2,10 +2,29 @@
 export enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
+	DATETIME = 'datetime',
+	/** 超链接 */
+	HREF = 'href',
+	/** 电话 */
+	PHONE = 'phone',
+	/** 邮箱 */
+	EMAIL = 'email',
+	/** 图片 */
+	IMAGE = 'image',
+	/** 附件 */
+	APPEND_FILE = 'appendFile',
+	/** 枚举 */
+	ENUM = 'enum',
 	/** 外键，关联其他表 */
 	RELATION = 'relation',
 	/** 映射其他表 */
 	MAPPING = 'mapping',
+	/** 系统表 */
+	SYS_USER = 'SYS_USER',
+	/** 系统表 */
+	SYS_USER_CREATOR = 'SYS_USER.CREATOR',
+	/** 系统表 */
+	SYS_USER_UPDATER = 'SYS_USER.UPDATER',
 }
 
 /** 数据库字段类型 */
@@ -43,4 +62,18 @@ export enum SQLOperator {
 export enum SQLOrder {
 	ASC = 'ASC',
 	DESC = 'DESC',
+}
+
+/** select 查询 limit 设置值类型 */
+export enum SQLLimitType {
+	/** 枚举值，20、50、100 等 */
+	ENUM = 'ENUM',
+	/** 自定义 */
+	CUSTOM = 'CUSTOM',
+}
+
+/** 默认值 */
+export enum DefaultValueWhenCreate {
+	/** 当前时间 */
+	CURRENT_TIME = '$currentTime'
 }

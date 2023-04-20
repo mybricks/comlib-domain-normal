@@ -6,8 +6,20 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
+import {depValidateEntity} from "../_utils/validate";
 
 export default {
+	/** 环境发生变化 */
+	'@envChanged'({ data, env, type, throwError }) {
+		const error = depValidateEntity({
+			entities: data.rules.entities,
+			newEntity: env.entity,
+			fields: data.rules.fields,
+			conditions: data.rules.conditions
+		});
+		
+		error && throwError(error);
+	},
   '@init': ({data, isAutoRun, output, setDesc}) => {
     const autoRun = isAutoRun ? isAutoRun() : false;
     if (autoRun) {

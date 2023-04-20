@@ -6,8 +6,15 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
+import {validateEntity} from "../_utils/validate";
 
 export default {
+	/** 环境发生变化 */
+	'@envChanged'({ data, env, type, throwError }) {
+		const error = validateEntity(data.rules.entities, env.entity, { conAry: data.rules.conAry, conditions: data.rules.conditions });
+		
+		error && throwError(error);
+	},
   ':root': [
     {
       title: '编辑',
@@ -24,7 +31,7 @@ export default {
           return data.rules
         },
         set({data, setDesc, outputs}, val) {
-          data.rules = val
+          data.rules = val;
 
           if (data.rules) {
             setDesc(`已选择 ${data.rules.desc}`)
