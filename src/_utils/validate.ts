@@ -109,32 +109,33 @@ export const depValidateEntity = (params: {
 	if (!curEntity || !newEntity) {
 		return;
 	}
-	const entityMap: Record<string, SelectedField[]> = {};
-	let whereFields: any[] = [];
-	const getFieldIdsByConditions = (conditions) => {
-		conditions.forEach(con => {
-			if (con.conditions) {
-				getFieldIdsByConditions(con.conditions);
+	
+	const originEntity = entities.find(e => e.id === newEntity.id);
+	
+	if (originEntity) {
+		const entityMap: Record<string, SelectedField[]> = {};
+		let whereFields: any[] = [];
+		const getFieldIdsByConditions = (conditions) => {
+			conditions.forEach(con => {
+				if (con.conditions) {
+					getFieldIdsByConditions(con.conditions);
+				} else {
+					con.fieldId && whereFields.push(con);
+				}
+			});
+		};
+		getFieldIdsByConditions([conditions]);
+		
+		[...whereFields, ...fields].forEach(f => {
+			if (!entityMap[f.entityId]) {
+				entityMap[f.entityId] = [f];
 			} else {
-				con.fieldId && whereFields.push(con);
+				entityMap[f.entityId].push(f);
 			}
 		});
-	};
-	getFieldIdsByConditions([conditions]);
-	
-	[...whereFields, ...fields].forEach(f => {
-		 if (!entityMap[f.entityId]) {
-			 entityMap[f.entityId] = [f];
-		 } else {
-			 entityMap[f.entityId].push(f);
-		 }
-	});
-	const usedFieldIds = entityMap[newEntity.id].map(f => f.fieldId);
-	
-	if (usedFieldIds.length) {
-		const originEntity = entities.find(e => e.id === newEntity.id);
+		const usedFieldIds = entityMap[newEntity.id]?.map(f => f.fieldId) || [];
 		
-		if (originEntity) {
+		if (usedFieldIds.length) {
 			const willAffectedFields = curEntity.fieldAry.filter(f => usedFieldIds.includes(f.id));
 			
 			if (originEntity.name !== newEntity.name) {
