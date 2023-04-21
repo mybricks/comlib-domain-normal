@@ -23,7 +23,8 @@ export default {
         return {
           get paramSchema() {
             return input.get('params').schema || {};
-          }
+          },
+	        batch: true,
         }
       },
       value: {
