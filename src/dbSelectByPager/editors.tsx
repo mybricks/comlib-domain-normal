@@ -52,8 +52,9 @@ export default {
         get({data, input, output}) {
           return data.selector
         },
-        set({data, setDesc, outputs}, val) {
+        set({data, setDesc, outputs, cancelError}, val) {
           data.selector = val;
+	        cancelError();
 
           if (data.selector) {
             setDesc(`已选择 ${data.selector.desc}`)

@@ -30,8 +30,9 @@ export default {
         get({data, input, output}) {
           return data.rules
         },
-        set({data, setDesc, outputs}, val) {
+        set({data, setDesc, outputs, cancelError}, val) {
           data.rules = val
+	        cancelError();
 
           if (data.rules) {
             setDesc(`已选择 ${data.rules.desc}`)

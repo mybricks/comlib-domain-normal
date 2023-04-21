@@ -11,7 +11,6 @@ import {depValidateEntity} from "../_utils/validate";
 export default {
 	/** 环境发生变化 */
 	'@envChanged'({ data, env, type, throwError }) {
-		console.log('env', env.entity);
 		const error = depValidateEntity({
 			entities: data.selector.entities,
 			newEntity: env.entity,
@@ -47,9 +46,9 @@ export default {
         get({data, input, output}) {
           return data.selector
         },
-        set({data, setDesc, outputs}, val) {
+        set({data, setDesc, outputs, cancelError}, val) {
           data.selector = val;
-	        console.log(val);
+	        cancelError();
 	
 	        if (data.selector) {
             setDesc(`已选择 ${data.selector.desc}`)
