@@ -3,6 +3,7 @@
     "./src/dbSelect/com.json",
     "./src/dbSelectByPager/com.json",
     "./src/dbInsert/com.json",
+    "./src/dbBatchInsert/com.json",
     "./src/dbUpdate/com.json",
     "./src/dbDelete/com.json",
     "./src/code-segment/com.json",
