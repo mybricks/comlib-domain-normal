@@ -10,10 +10,10 @@ import {validateEntity} from "../_utils/validate";
 
 export default {
 	/** 环境发生变化 */
-	'@envChanged'({ data, env, type, throwError }) {
+	'@envChanged'({ data, env, throwError, cancelError }) {
 		const error = validateEntity(data.rules.entities, env.entity, { conAry: data.rules.conAry, conditions: data.rules.conditions });
 		
-		error && throwError(error);
+		error ? throwError(error) : cancelError();
 	},
   ':root': [
     {

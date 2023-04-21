@@ -10,7 +10,7 @@ import {depValidateEntity} from "../_utils/validate";
 
 export default {
 	/** 环境发生变化 */
-	'@envChanged'({ data, env, type, throwError }) {
+	'@envChanged'({ data, env, cancelError, throwError }) {
 		const error = depValidateEntity({
 			entities: data.selector.entities,
 			newEntity: env.entity,
@@ -19,7 +19,7 @@ export default {
 			conditions: data.selector.conditions
 		});
 		
-		error && throwError(error);
+		error ? throwError(error) : cancelError();
 	},
   '@init': ({data, isAutoRun, output, setDesc}) => {
     const autoRun = isAutoRun ? isAutoRun() : false;

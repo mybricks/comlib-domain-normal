@@ -1,0 +1,34 @@
+{
+  "title": "批量添加数据",
+  "namespace": "mybricks.domain.dbBatchInsert",
+  "author": "CheMingjun",
+  "author_name": "车明君",
+  "version": "1.0.0",
+  "description": "向数据库中批量添加数据",
+  "icon": "./icon.svg",
+  "runtime": "./rt.tsx",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "params",
+      "title": "参数",
+      "schema": {
+        "type": "follow"
+      },
+      "rels": [
+        "rtn"
+      ],
+      "editable": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "rtn",
+      "title": "插入的数据id",
+      "schema": {
+        "type": "number"
+      }
+    }
+  ]
+}
