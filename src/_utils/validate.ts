@@ -102,8 +102,9 @@ export const depValidateEntity = (params: {
 	newEntity: Entity;
 	fields: SelectedField[];
 	conditions: any[];
+	orders: SelectedField[];
 }) => {
-	const { entities, newEntity, fields = [], conditions } = params;
+	const { entities, newEntity, fields = [], conditions, orders = [] } = params;
 	const curEntity = entities.find(e => e.selected);
 	
 	if (!curEntity || !newEntity) {
@@ -126,7 +127,7 @@ export const depValidateEntity = (params: {
 		};
 		getFieldIdsByConditions([conditions]);
 		
-		[...whereFields, ...fields].forEach(f => {
+		[...whereFields, ...fields, ...orders].forEach(f => {
 			if (!entityMap[f.entityId]) {
 				entityMap[f.entityId] = [f];
 			} else {

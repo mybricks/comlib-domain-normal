@@ -15,6 +15,7 @@ export default {
 			entities: data.selector.entities,
 			newEntity: env.entity,
 			fields: data.selector.fields,
+			orders: data.selector.orders,
 			conditions: data.selector.conditions
 		});
 		

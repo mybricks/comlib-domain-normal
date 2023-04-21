@@ -12,10 +12,11 @@ export default {
 	/** 环境发生变化 */
 	'@envChanged'({ data, env, type, throwError }) {
 		const error = depValidateEntity({
-			entities: data.rules.entities,
+			entities: data.selector.entities,
 			newEntity: env.entity,
-			fields: data.rules.fields,
-			conditions: data.rules.conditions
+			fields: data.selector.fields,
+			orders: data.selector.orders,
+			conditions: data.selector.conditions
 		});
 		
 		error && throwError(error);
