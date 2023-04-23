@@ -14,16 +14,18 @@ export default {
 		const error = validateEntity(data.rules.entities, env.entity, { conAry: data.rules.conAry, conditions: data.rules.conditions });
 		
 		error ? throwError(error) : cancelError();
+		data.errorMessage = error;
 	},
   ':root': [
     {
       title: '编辑',
       type: 'domain.dbUpdate',
-      options({data, input, output}) {
+      options({ data, input }) {
         return {
           get paramSchema() {
             return input.get('params').schema;
-          }
+          },
+	        errorMessage: data.errorMessage
         };
       },
       value: {
@@ -32,6 +34,7 @@ export default {
         },
         set({data, setDesc, outputs, cancelError}, val) {
           data.rules = val;
+	        data.errorMessage = '';
 	        cancelError();
 
           if (data.rules) {

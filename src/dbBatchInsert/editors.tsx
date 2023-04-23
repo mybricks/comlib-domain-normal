@@ -14,6 +14,7 @@ export default {
 		const error = validateEntity(data.rules.entities, env.entity);
 		
 		error ? throwError(error) : cancelError();
+		data.errorMessage = error;
 	},
   ':root': [
     {
@@ -25,6 +26,7 @@ export default {
             return input.get('params').schema || {};
           },
 	        batch: true,
+	        errorMessage: data.errorMessage,
         }
       },
       value: {
@@ -33,6 +35,7 @@ export default {
         },
         set({data, setDesc, outputs, cancelError}, val) {
           data.rules = val;
+	        data.errorMessage = '';
 	        cancelError();
 
           if (data.rules) {

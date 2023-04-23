@@ -20,6 +20,7 @@ export default {
 		});
 		
 		error ? throwError(error) : cancelError();
+		data.errorMessage = error;
 	},
   '@init': ({data, isAutoRun, output, setDesc}) => {
     const autoRun = isAutoRun ? isAutoRun() : false;
@@ -46,7 +47,8 @@ export default {
 						
             return computedParams || {};
           },
-	        showPager: true
+	        showPager: true,
+	        errorMessage: data.errorMessage,
         }
       },
       value: {
@@ -55,6 +57,7 @@ export default {
         },
         set({data, setDesc, outputs, cancelError}, val) {
           data.selector = val;
+	        data.errorMessage = '';
 	        cancelError();
 
           if (data.selector) {
