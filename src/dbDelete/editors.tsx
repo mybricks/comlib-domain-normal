@@ -25,7 +25,9 @@ export default {
           get paramSchema() {
             return input.get('params').schema;
           },
-	        errorMessage: data.errorMessage
+          get errorMessage() {
+            return data.errorMessage;
+          },
         };
       },
       value: {

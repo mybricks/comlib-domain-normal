@@ -41,8 +41,10 @@ export default {
           get paramSchema() {
             return input.get('params').schema || {};
           },
+          get errorMessage() {
+            return data.errorMessage;
+          },
 	        showPager: false,
-	        errorMessage: data.errorMessage,
         }
       },
       value: {

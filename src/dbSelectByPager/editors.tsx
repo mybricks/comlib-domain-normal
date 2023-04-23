@@ -47,8 +47,10 @@ export default {
 						
             return computedParams || {};
           },
+          get errorMessage() {
+            return data.errorMessage;
+          },
 	        showPager: true,
-	        errorMessage: data.errorMessage,
         }
       },
       value: {
