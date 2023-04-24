@@ -5,8 +5,7 @@
   "main": "index.js",
   "author": "CheMingjun",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "scripts": {
     "test": "jest",
     "build": "webpack --config build/webpack.config.js"

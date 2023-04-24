@@ -8,7 +8,8 @@
     "./src/dbDelete/com.json",
     "./src/code-segment/com.json",
     "./src/merge/com.json",
-    "./src/dbChatGpt/com.json"
+    "./src/dbChatGpt/com.json",
+    "./src/requestHeaser/com.json"
   ],
   "target": "node"
 }
