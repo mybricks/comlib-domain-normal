@@ -9,7 +9,7 @@
     "./src/code-segment/com.json",
     "./src/merge/com.json",
     "./src/dbChatGpt/com.json",
-    "./src/requestHeaser/com.json"
+    "./src/requestHeader/com.json"
   ],
   "target": "node"
 }
