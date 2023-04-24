@@ -137,7 +137,7 @@ export const depValidateEntity = (params: {
 		const usedFieldIds = entityMap[newEntity.id]?.map(f => f.fieldId) || [];
 		
 		if (usedFieldIds.length) {
-			const willAffectedFields = curEntity.fieldAry.filter(f => usedFieldIds.includes(f.id));
+			const willAffectedFields = originEntity.fieldAry.filter(f => usedFieldIds.includes(f.id));
 			
 			if (originEntity.name !== newEntity.name) {
 				return `实体名存在变更，由【${originEntity.name}】变更为【${newEntity.name}】`;
