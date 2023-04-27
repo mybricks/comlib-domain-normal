@@ -8,34 +8,21 @@ export default function ({env, data, outputs, inputs, onError}) {
   }
 
   if (data.autoRun) {
-    if (script.list) {
-      Promise.all([
-				eval(safeDecodeURIComponent(script.list))({}, env.executeSql),
-	      eval(safeDecodeURIComponent(script.total))({}, env.executeSql)
-      ])
-	      .then(([data, countData]) => {
-	        outputs['rtn']({
-		        list: data,
-		        total: countData[0]?.total
-	        });
-	      })
-        .catch(ex => {
-	        onError(`执行SQL发生错误,${ex?.message}`);
-	      });
-    }
+	  eval(script)({}, env.executeSql).then(data => {
+		  outputs['rtn'](data);
+	  }).catch(ex => {
+		  onError(`执行SQL发生错误,${ex?.message}`);
+	  })
   } else {
-	  inputs['params'](async (val, outputRels) => {
+	  inputs['params'](async (val) => {
 		  const values = { ...(val.pageParams || {}), ...(val.params || {}) };
+		
+		  try {
+			  const data = await eval(safeDecodeURIComponent(script))(values, env.executeSql);
 			
-		  if (script.list) {
-				try {
-					const data = await eval(safeDecodeURIComponent(script.list))(values, env.executeSql);
-					const countData = await eval(safeDecodeURIComponent(script.total))(values, env.executeSql);
-					
-					outputs['rtn']({ list: data, total: countData[0]?.total });
-				} catch (e: AnyType) {
-					onError(`执行SQL发生错误,${e?.message}`);
-				}
+			  outputs['rtn'](data);
+		  } catch (e: AnyType) {
+			  onError(`执行SQL发生错误,${e?.message}`);
 		  }
 	  })
 	}
