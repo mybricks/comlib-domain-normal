@@ -21,11 +21,11 @@ export default function ({ env, data, inputs, outputs, logger, onError }: Runtim
 	      eval(decodeURIComponent(fns))({ ...runJSParams, inputValue: val });
       } catch (ex) {
         onError?.(ex.message);
-	      env.edit ? console.error('js计算组件运行错误.', ex) : logger.error(`${ex}`);
+	      env.edit ? console.error('js计算组件运行错误.', ex) : env.logger?.error(`${ex}`);
       }
     });
   } catch (ex) {
 	  onError?.(ex.message);
-	  env.edit ? console.error('js计算组件运行错误.', ex) : logger.error(`${ex}`);
+	  env.edit ? console.error('js计算组件运行错误.', ex) : env.logger?.error(`${ex}`);
   }
 }
