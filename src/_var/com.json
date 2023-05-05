@@ -8,7 +8,7 @@
   "description": "变量",
   "icon": "./icon.png",
   "data": "./data.json",
-  "runtime": "./Var.tsx",
+  "runtime": "./runtime.tsx",
   "editors": "./editors.tsx",
   "rtType": "js",
   "inputs": [

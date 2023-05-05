@@ -16,8 +16,6 @@ export default function ({env, data, outputs, inputs}) {
     data.val = val
     outputs['changed'](clone(val), true)//notify all forked coms
   })
-
-  // outputs['changed'](data.val)
 }
 
 function clone(val) {
