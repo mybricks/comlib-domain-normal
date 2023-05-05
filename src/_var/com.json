@@ -1,7 +1,7 @@
 {
   "visibility": false,
   "title": "变量",
-  "namespace": "mybricks.domain.var",
+  "namespace": "mybricks.core-comlib.var",
   "author": "CheMingjun",
   "author_name": "车明君",
   "version": "1.0.0",

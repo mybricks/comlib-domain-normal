@@ -9,7 +9,6 @@
     "./src/code-segment/com.json",
     "./src/_muilt-inputJs/com.json",
     "./src/merge/com.json",
-    "./src/_var/com.json",
     "./src/requestHeader/com.json"
   ]
 }

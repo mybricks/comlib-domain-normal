@@ -1,6 +1,6 @@
 {
   "title": "JS计算",
-  "namespace": "mybricks.domain._muilt-inputJs",
+  "namespace": "mybricks.core-comlib._muilt-inputJs",
   "version": "1.0.0",
   "description": "JS计算",
   "author": "MyBricks",
