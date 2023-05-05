@@ -1,0 +1,56 @@
+{
+  "visibility": false,
+  "title": "变量",
+  "namespace": "mybricks.domain.var",
+  "author": "CheMingjun",
+  "author_name": "车明君",
+  "version": "1.0.0",
+  "description": "变量",
+  "icon": "./icon.png",
+  "data": "./data.json",
+  "runtime": "./Var.tsx",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "get",
+      "title": "读取",
+      "schema": {
+        "type": "any"
+      },
+      "rels": [
+        "return"
+      ]
+    },
+    {
+      "id": "set",
+      "title": "赋值",
+      "schema": {
+        "type": "follow"
+      }
+    },
+    {
+      "id": "reset",
+      "title": "重置",
+      "schema": {
+        "type": "any"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "id": "return",
+      "title": "完成",
+      "schema": {
+        "type": "unknown"
+      }
+    },
+    {
+      "id": "changed",
+      "title": "当值发生变化",
+      "schema": {
+        "type": "unknown"
+      }
+    }
+  ]
+}
