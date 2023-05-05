@@ -1,4 +1,5 @@
 {
+    "visibility": false,
     "title": "JS计算",
     "namespace": "mybricks.domain.segment",
     "version": "1.0.0",
@@ -29,4 +30,3 @@
       }
     ]
   }
-  
