@@ -58,20 +58,15 @@ export default {
           return data.selector
         },
         set({data, setDesc, outputs, cancelError}, val) {
-          data.selector = val;
+	        const { outputSchema, ...otherVal } = val;
+	        data.selector = otherVal;
 	        data.errorMessage = '';
 	        cancelError();
 
           if (data.selector) {
             setDesc(`已选择 ${data.selector.desc}`)
 
-            outputs.get('rtn').setSchema({
-              type: 'object',
-	            properties: {
-								total: { type: 'number' },
-								list: { type: 'array' },
-	            },
-            })
+            outputs.get('rtn').setSchema(outputSchema);
           } else {
             setDesc(`未完成选择`)
           }
