@@ -11,7 +11,8 @@ export default function ({env, data, outputs, inputs, onError}) {
 	  eval(script)({}, env.executeSql).then(data => {
 		  outputs['rtn'](data);
 	  }).catch(ex => {
-		  onError(`执行SQL发生错误,${ex?.message}`);
+		  env.edit ? console.error('执行SQL发生错误, ', ex) : undefined;
+		  onError(`执行SQL发生错误, ${ex?.message}`);
 	  })
   } else {
 	  inputs['params'](async (val) => {
@@ -22,7 +23,8 @@ export default function ({env, data, outputs, inputs, onError}) {
 			
 			  outputs['rtn'](data);
 		  } catch (e: AnyType) {
-			  onError(`执行SQL发生错误,${e?.message}`);
+			  env.edit ? console.error('执行SQL发生错误, ', e) : undefined;
+			  onError(`执行SQL发生错误, ${e?.message}`);
 		  }
 	  })
 	}

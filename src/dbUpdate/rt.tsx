@@ -11,6 +11,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 	        .then(() => outputs['rtn']())
 	        .catch(ex => onError(`执行SQL发生错误,${ex?.message}`));
 		  } catch (error: any) {
+			  env.edit ? console.error('执行SQL发生错误, ', error) : undefined;
 			  onError(`执行错误, ${error?.message}`);
 		  }
     }
