@@ -1,0 +1,34 @@
+{
+  "title": "自定义 SQL",
+  "namespace": "mybricks.domain.dbCustomSQL",
+  "author": "CheMingjun",
+  "author_name": "车明君",
+  "version": "1.0.0",
+  "description": "自定义SQL语句执行",
+  "icon": "./icon.svg",
+  "runtime": "./rt.tsx",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "params",
+      "title": "参数",
+      "schema": {
+        "type": "follow"
+      },
+      "rels": [
+        "rtn"
+      ],
+      "editable": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "rtn",
+      "title": "返回数据",
+      "schema": {
+        "type": "any"
+      }
+    }
+  ]
+}
