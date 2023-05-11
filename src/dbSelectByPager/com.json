@@ -19,7 +19,7 @@
           "name": "pageParams",
           "type": "object",
           "properties": {
-            "pageIndex": {
+            "pageNum": {
               "type": "number"
             },
             "pageSize": {
