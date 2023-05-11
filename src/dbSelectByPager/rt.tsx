@@ -6,12 +6,13 @@ export default function ({env, data, outputs, inputs, onError}) {
   if (!script) {
     return
   }
+	const isEdit = env.runtime?.debug;
 
   if (data.autoRun) {
-	  eval(script)({}, env.executeSql).then(data => {
+	  eval(script)({}, { ...env, isEdit }).then(data => {
 		  outputs['rtn'](data);
 	  }).catch(ex => {
-		  env.edit ? console.error('执行SQL发生错误, ', ex) : undefined;
+		  isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
 		  onError(`执行SQL发生错误, ${ex?.message}`);
 	  })
   } else {
@@ -19,11 +20,11 @@ export default function ({env, data, outputs, inputs, onError}) {
 		  const values = { ...(val.pageParams || {}), ...(val.params || {}) };
 		
 		  try {
-			  const data = await eval(safeDecodeURIComponent(script))(values, env.executeSql);
+			  const data = await eval(safeDecodeURIComponent(script))(values, { ...env, isEdit });
 			
 			  outputs['rtn'](data);
 		  } catch (e: AnyType) {
-			  env.edit ? console.error('执行SQL发生错误, ', e) : undefined;
+			  isEdit ? console.error('执行SQL发生错误, ', e) : undefined;
 			  onError(`执行SQL发生错误, ${e?.message}`);
 		  }
 	  })
