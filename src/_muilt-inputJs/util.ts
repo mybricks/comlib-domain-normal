@@ -1,8 +1,9 @@
-
-export function covertObject2Array(input) {
+export function convertObject2Array(input) {
 	let result = [] as any[];
-	Object.keys(input).sort((a, b)=>{
-		return parseInt(a) - parseInt(b);
+	Object.keys(input).sort((a, b) => {
+		let _a = a?.match(/\d+/g)?.[0] || 0;
+		let _b = b?.match(/\d+/g)?.[0] || 0;
+		return +_a - +_b;
 	}).forEach((key) => {
 		result.push(input[key]);
 	});
