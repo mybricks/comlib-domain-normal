@@ -9,7 +9,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 		  try {
 			  const sql = eval(script)(val, { ...env, isEdit })
 			  env.executeSql(sql)
-			    .then(data => outputs['rtn'](data.insertId || data.rows?.[0]?.insertId))
+			    .then(data => outputs['rtn'](data.insertId || data.rows?.insertId))
 			    .catch(ex => onError(`执行SQL发生错误, ${ex?.message}`));
 		  } catch (error: any) {
 			  isEdit ? console.error('执行SQL发生错误, ', error) : undefined;
