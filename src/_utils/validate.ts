@@ -160,6 +160,10 @@ export const depValidateEntity = (params: {
 					return `实体【${originEntity.name}】中字段【${originField.name}】数据格式化方式存在变更`;
 				}
 				
+				if (originField.mapping && !nowField.mapping) {
+					return `实体【${originEntity.name}】中字段【${originField.name}】所映射数据存在变更`;
+				}
+				
 				if (originField.mapping && nowField.mapping) {
 					if (
 						originField.mapping.condition !== nowField.mapping.condition
