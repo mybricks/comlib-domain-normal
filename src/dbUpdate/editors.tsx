@@ -11,6 +11,9 @@ import {validateEntity} from "../_utils/validate";
 export default {
 	/** 环境发生变化 */
 	'@envChanged'({ data, env, throwError, cancelError }) {
+		if (!data.rules) {
+			return;
+		}
 		const error = validateEntity(data.rules.entities, env.entity, { conAry: data.rules.conAry, conditions: data.rules.conditions });
 		
 		error ? throwError(error) : cancelError();

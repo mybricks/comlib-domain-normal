@@ -11,6 +11,9 @@ import {depValidateEntity} from "../_utils/validate";
 export default {
 	/** 环境发生变化 */
 	'@envChanged'({ data, env, cancelError, throwError }) {
+		if (!data.selector) {
+			return;
+		}
 		const error = depValidateEntity({
 			entities: data.selector.entities,
 			newEntity: env.entity,
