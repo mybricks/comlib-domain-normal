@@ -2,6 +2,7 @@
   "comAry": [
     "./src/dbSelect/com.json",
     "./src/dbSelectByPager/com.json",
+    "./src/dbSelectCount/com.json",
     "./src/dbInsert/com.json",
     "./src/dbBatchInsert/com.json",
     "./src/dbUpdate/com.json",
