@@ -4,15 +4,7 @@ export enum FieldBizType {
 	NUMBER = 'number',
 	DATETIME = 'datetime',
 	/** 超链接 */
-	HREF = 'href',
-	/** 电话 */
-	PHONE = 'phone',
-	/** 邮箱 */
-	EMAIL = 'email',
-	/** 图片 */
-	IMAGE = 'image',
-	/** 附件 */
-	APPEND_FILE = 'appendFile',
+	JSON = 'json',
 	/** 枚举 */
 	ENUM = 'enum',
 	/** 外键，关联其他表 */
@@ -21,9 +13,7 @@ export enum FieldBizType {
 	MAPPING = 'mapping',
 	/** 系统表 */
 	SYS_USER = 'SYS_USER',
-	/** 系统表 */
 	SYS_ROLE = 'SYS_ROLE',
-	/** 系统表 */
 	SYS_ROLE_RELATION = 'SYS_ROLE_RELATION',
 }
 
