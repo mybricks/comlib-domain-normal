@@ -47,7 +47,7 @@ export default {
           get errorMessage() {
             return data.errorMessage;
           },
-	        showPager: false,
+	        single: true,
         }
       },
       value: {
