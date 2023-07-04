@@ -6,44 +6,25 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
-import {validateEntity} from "../_utils/validate";
 
 export default {
-	/** 环境发生变化 */
-	'@envChanged'({ data, env, cancelError, throwError }) {
-		const error = validateEntity(data.rules.entities, env.entity);
-		
-		error ? throwError(error) : cancelError();
-		data.errorMessage = error;
-	},
   ':root': [
     {
-      title: '编辑',
-      type: 'domain.dbInsert',
-      options({data, input, output}) {
+      title: '编辑SQL',
+      type: 'domain.dbCustomSQL',
+      options({input}) {
         return {
           get paramSchema() {
             return input.get('params').schema || {};
           },
-          get errorMessage() {
-            return data.errorMessage;
-          },
         }
       },
       value: {
-        get({data, input, output}) {
-          return data.rules;
+        get({data}) {
+          return data.sql;
         },
-        set({data, setDesc, outputs, cancelError}, val) {
-          data.rules = val;
-	        data.errorMessage = '';
-	        cancelError();
-
-          if (data.rules) {
-            setDesc(`已选择 ${data.rules.desc}`);
-          } else {
-            setDesc(`未完成选择`);
-          }
+        set({data}, val) {
+          data.sql = val;
         }
       }
     }
