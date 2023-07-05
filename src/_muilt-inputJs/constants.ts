@@ -12,7 +12,7 @@ export const IMMEDIATE_CODE_TEMPLATE = `({ outputs, env }) => {
 export const COMMENTS = `/**
 * @parma inputs: any[] 输入项
 * @parma outputs: any[] 输出项
-* @parma env: { executeSql: ( sql: string) => any } 环境变量
+* @parma env: { executeSql: ( sql: string) => { rows: any[] } } 环境变量
 *
 * 例子
 * ({ inputs, outputs, env }) => {
