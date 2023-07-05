@@ -37,7 +37,7 @@ export default function ({env, data, outputs, inputs, onError}) {
 
 			}
 			env.executeSql(curSQL, true)
-				.then(data => outputs['rtn'](Array.from(data.rows)))
+				.then(data => outputs['rtn'](data.rows))
 				.catch(ex => onError(`执行自定义SQL发生错误, ${ex?.message}`));
 		} catch (error: any) {
 			env.edit ? console.error('执行自定义SQL发生错误, ', error) : undefined;

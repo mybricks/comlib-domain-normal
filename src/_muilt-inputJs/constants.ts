@@ -12,7 +12,7 @@ export const IMMEDIATE_CODE_TEMPLATE = `({ outputs, env }) => {
 export const COMMENTS = `/**
 * @parma inputs: any[] 输入项
 * @parma outputs: any[] 输出项
-* @parma env: { executeSql: ( sql: string) => { rows: any[] } } 环境变量
+* @parma env: { executeSql: ( sql: string) => { rows: any[] | any } } 环境变量
 *
 * 例子
 * ({ inputs, outputs, env }) => {
@@ -30,7 +30,8 @@ export const COMMENTS = `/**
 *   // output2(inputValue1);
 *
 *   // 调用环境变量上方法查询数据库
-*   // env.executeSql('SELECT * FORM {table_name}'); 
+*   // 请注意：INSERT 语句返回类型为 { rows: object }；SELECT 语句返回类型为 { rows: object[] }
+*   // const data = env.executeSql('SELECT * FORM {table_name}'); 
 * }
 */`;
 
