@@ -6,7 +6,10 @@ export default function ({ env, data, inputs, outputs, onError }: RuntimeParams<
 
   const runJSParams = {
     outputs: convertObject2Array(outputs),
-    env: { executeSql: sql => env.executeSql(sql, true) },
+    env: {
+       executeSql: sql => env.executeSql(sql, true),
+       genUniqueId: env.genUniqueId,
+    },
   };
   try {
     if (runImmediate) {
