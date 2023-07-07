@@ -15,6 +15,7 @@ export const COMMENTS = `/**
 * @parma env: {
 *   executeSql: ( sql: string) => { rows: any[] | any }, // 执行 SQL
 *   genUniqueId: () => number, // 生成递增的唯一 ID
+*   getEntityName: (entityName: string) => string, // 获取实体表名，生成 SQL 语句时需要
 * } 环境变量
 *
 * 例子
@@ -34,7 +35,7 @@ export const COMMENTS = `/**
 *
 *   // 调用环境变量上方法查询数据库
 *   // 请注意: INSERT 语句返回类型为 { rows: object }; SELECT 语句返回类型为 { rows: object[] }
-*   // const data = env.executeSql('SELECT * FORM {table_name}'); 
+*   // const data = env.executeSql('SELECT * FORM ' + env.getEntityName(table_name)); 
 * }
 */`;
 

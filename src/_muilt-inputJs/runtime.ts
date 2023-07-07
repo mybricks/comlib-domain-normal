@@ -3,12 +3,14 @@ import { convertObject2Array } from './util';
 
 export default function ({ env, data, inputs, outputs, onError }: RuntimeParams<Data>) {
   const { fns, runImmediate } = data;
+  const isDebug = env.runtime?.debug;
 
   const runJSParams = {
     outputs: convertObject2Array(outputs),
     env: {
        executeSql: sql => env.executeSql(sql, true),
        genUniqueId: env.genUniqueId,
+       getEntityName: isDebug ? _ => _ : env.getEntityName,
     },
   };
   try {
