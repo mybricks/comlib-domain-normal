@@ -8,7 +8,6 @@
     "./src/dbBatchInsert/com.json",
     "./src/dbUpdate/com.json",
     "./src/dbDelete/com.json",
-    "./src/dbCustomSQL/com.json",
     "./src/code-segment/com.json",
     "./src/_var/com.json",
     "./src/_muilt-inputJs/com.json",

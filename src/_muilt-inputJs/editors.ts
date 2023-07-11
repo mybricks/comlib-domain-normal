@@ -110,7 +110,7 @@ function updateOutputSchema(output, code) {
         inputValue: void 0,
         outputs: convertObject2Array(outputs),
         inputs: convertObject2Array(inputs),
-        env: { executeSql: sql => ({ rows: [] }), genUniqueId: () => Date.now() },
+        env: { executeSql: sql => ({ rows: [] }), genUniqueId: () => Date.now(), getEntityName: _ => _ },
       });
     } catch (error) {
       console.error(error)

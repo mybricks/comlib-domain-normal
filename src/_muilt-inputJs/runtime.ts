@@ -8,7 +8,7 @@ export default function ({ env, data, inputs, outputs, onError }: RuntimeParams<
   const runJSParams = {
     outputs: convertObject2Array(outputs),
     env: {
-       executeSql: sql => env.executeSql(sql, true),
+       executeSql: sql => env.executeSql(sql),
        genUniqueId: env.genUniqueId,
        getEntityName: isDebug ? _ => _ : env.getEntityName,
     },
