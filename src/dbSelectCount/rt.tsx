@@ -1,27 +1,45 @@
-import {safeDecodeURIComponent} from "../_utils/util";
+import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
 
 export default function ({ env, data, outputs, inputs, onError }) {
-  let script = safeDecodeURIComponent(data.selector?.script);
-  if (!script) {
-    return
-  }
+	if (!data.selector) {
+		return;
+	}
 	const isEdit = env.runtime?.debug;
+	const baseParams = {
+		params: {},
+		fields: data.selector.fields || [],
+		conditions: data.selector.conditions || [],
+		entities: data.selector.entities || [],
+		limit: data.selector.limit,
+		showPager: false,
+		selectCount: true,
+		orders: data.selector.orders,
+		pageNum: data.selector.pageNum,
+		isEdit,
+	};
 
-  if (data.autoRun) {
-	  eval(script)({}, { ...env, isEdit }).then(data => {
-      outputs['rtn'](data);
-    }).catch(ex => {
-		  isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
-      onError(`执行SQL发生错误, ${ex?.message}`);
-    })
-  }
+	const select = async (params) => {
+		const [, countSql] = spliceSelectSQLByConditions(params) || [];
+		const { rows: countRows } = await env.executeSql(countSql);
 
-  inputs['params']((val) => {
-    eval(script)(val, { ...env, isEdit }).then(data => {
-      outputs['rtn'](data);
-    }).catch(ex => {
-	    isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
-      onError(`执行SQL发生错误, ${ex?.message}`);
-    })
-  })
+		return { total: countRows[0] ? countRows[0].total : 0 };
+	};
+
+	if (data.autoRun) {
+		select(baseParams)
+			.then(data => outputs['rtn'](data))
+			.catch(ex => {
+		    isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
+				onError(`执行SQL发生错误, ${ex?.message}`);
+			});
+	}
+
+	inputs['params']((val) => {
+		select({ ...baseParams, params: val })
+			.then(data => outputs['rtn'](data))
+			.catch(ex => {
+	      isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
+				onError(`执行SQL发生错误, ${ex?.message}`);
+			});
+	});
 }

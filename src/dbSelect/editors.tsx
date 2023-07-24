@@ -6,7 +6,7 @@
  * CheMingjun @2019
  * mybricks@126.com
  */
-import {depValidateEntity} from "../_utils/validate";
+import { depValidateEntity } from '../_utils/validate';
 
 export default {
 	/** 环境发生变化 */
@@ -25,53 +25,48 @@ export default {
 		error ? throwError(error) : cancelError();
 		data.errorMessage = error;
 	},
-  '@init': ({data, isAutoRun, output, setDesc}) => {
-    const autoRun = isAutoRun ? isAutoRun() : false;
-    if (autoRun) {
-      data.autoRun = true;
-    } else {
-      data.autoRun = false
-    }
+	'@init': ({ data, isAutoRun, setDesc }) => {
+		data.autoRun = !!(isAutoRun ? isAutoRun() : false);
 
-    setDesc(`未选择数据`)
-  },
-  ':root': [
-    {
-      title: '选择',
-      type: 'domain.dbSelect',
-      options({data, input, output}) {
-        return {
-          get paramSchema() {
-            return input.get('params').schema || {};
-          },
-          get errorMessage() {
-            return data.errorMessage;
-          },
+		setDesc('未选择数据');
+	},
+	':root': [
+		{
+			title: '选择',
+			type: 'domain.dbSelect',
+			options({ data, input }) {
+				return {
+					get paramSchema() {
+						return input.get('params').schema || {};
+					},
+					get errorMessage() {
+						return data.errorMessage;
+					},
 	        showPager: false,
-        }
-      },
-      value: {
-        get({data, input, output}) {
-          return data.selector
-        },
-        set({data, setDesc, outputs, cancelError}, val) {
+				};
+			},
+			value: {
+				get({ data }) {
+					return data.selector;
+				},
+				set({ data, setDesc, outputs, cancelError }, val) {
 					const { outputSchema, ...otherVal } = val;
-          data.selector = otherVal;
+					data.selector = otherVal;
 	        data.errorMessage = '';
 	        cancelError();
 	
 	        if (data.selector) {
-            setDesc(`已选择 ${data.selector.desc}`)
+						setDesc(`已选择 ${data.selector.desc}`);
 
-            outputs.get('rtn').setSchema(outputSchema);
-          } else {
-            setDesc(`未完成选择`)
-          }
-        }
-      }
-    },
-  ]
-}
+						outputs.get('rtn').setSchema(outputSchema);
+					} else {
+						setDesc('未完成选择');
+					}
+				}
+			}
+		},
+	]
+};
 
 
 

@@ -1,33 +1,63 @@
-import {safeDecodeURIComponent} from "../_utils/util";
+import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
+import { spliceDataFormat } from '../_utils/format';
 
 const isEmpty = (value) => {
-  return value === undefined || value === null || (Array.isArray(value) && !value.length)
+	return value === undefined || value === null || (Array.isArray(value) && !value.length);
 };
 
 export default function ({ env, data, outputs, inputs, onError }) {
-  let script = safeDecodeURIComponent(data.selector?.script);
-  if (!script) {
-    return
-  }
+	if (!data.selector) {
+		return;
+	}
 	const isEdit = env.runtime?.debug;
+	const baseParams = {
+		params: {},
+		fields: data.selector.fields || [],
+		conditions: data.selector.conditions || [],
+		entities: data.selector.entities || [],
+		limit: data.selector.limit,
+		showPager: false,
+		selectCount: false,
+		orders: data.selector.orders,
+		pageNum: data.selector.pageNum,
+		isEdit,
+	};
 
-  if (data.autoRun) {
-	  eval(script)({}, { ...env, isEdit }).then(value => {
-      const curValue = value?.[0];
-      outputs[data.emptyCheck && isEmpty(curValue) ? 'empty' : 'rtn'](curValue);
-    }).catch(ex => {
-		  isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
-      onError(`执行SQL发生错误, ${ex?.message}`);
-    })
-  }
+	const select = async (params) => {
+		const [sql] = spliceSelectSQLByConditions(params) || [];
+		let { rows } = await env.executeSql(sql);
 
-  inputs['params']((val) => {
-    eval(script)(val, { ...env, isEdit }).then(value => {
-      const curValue = value?.[0];
-      outputs[data.emptyCheck && isEmpty(curValue) ? 'empty' : 'rtn'](curValue);
-    }).catch(ex => {
-	    isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
-      onError(`执行SQL发生错误, ${ex?.message}`);
-    })
-  })
+		rows = Array.from(rows || []);
+		spliceDataFormat(params.fields || [], params.entities, rows);
+
+		return rows;
+	};
+
+	if (data.autoRun) {
+		select(baseParams)
+			.then(value => {
+				const curValue = value?.[0];
+				outputs[data.emptyCheck && isEmpty(curValue) ? 'empty' : 'rtn'](curValue);
+			})
+			.catch(ex => {
+		  	isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
+				onError(`执行SQL发生错误, ${ex?.message}`);
+			});
+	}
+
+	inputs['params']((val) => {
+		select({
+			...baseParams,
+			params: val,
+			orders: (val.orders && Array.isArray(val.orders)) ? val.orders : baseParams.orders
+		})
+			.then(value => {
+				const curValue = value?.[0];
+				outputs[data.emptyCheck && isEmpty(curValue) ? 'empty' : 'rtn'](curValue);
+			})
+			.catch(ex => {
+	    	isEdit ? console.error('执行SQL发生错误, ', ex) : undefined;
+				onError(`执行SQL发生错误, ${ex?.message}`);
+			});
+	});
 }
