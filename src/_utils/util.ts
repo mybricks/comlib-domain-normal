@@ -24,3 +24,13 @@ export const safeDecodeURIComponent = (content: string) => {
 		return content ?? '';
 	}
 };
+
+export const get = (value, keys: string[] = []) => {
+	let curValue = value;
+
+	while (curValue !== undefined && keys.length) {
+		curValue = curValue?.[keys.shift() as string];
+	}
+
+	return curValue;
+};

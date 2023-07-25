@@ -1,4 +1,6 @@
 /** 根据字段类型返回拼接 sql 的具体指 */
+import { FieldDBType } from '../_constants/field';
+
 export const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
 	case 'varchar': return `'${val}'`;
@@ -17,4 +19,20 @@ export const getValueByOperatorAndFieldType = (dbType: string, operator: string,
 	}
 
 	return getValueByFieldType(dbType, val);
+};
+
+/** 根据字段类型获取 sql 拼接时字段值的符号 */
+export const getQuoteByFieldType = (dbType: string) => {
+	switch (dbType) {
+	case FieldDBType.VARCHAR: {
+		return '\'';
+	}
+	case FieldDBType.BIGINT: {
+		return '';
+	}
+	case FieldDBType.MEDIUMTEXT: {
+		return '\'';
+	}
+	default: return '';
+	}
 };
