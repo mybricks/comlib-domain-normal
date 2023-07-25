@@ -1,4 +1,4 @@
-import { spliceInsertSQL } from '../_utils/insertSQL';
+import { spliceInsertSQL, validateParams } from '../_utils/insertSQL';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnyType } from '../_types';
 
@@ -8,6 +8,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 		
 	  if (data.rules) {
 		  try {
+				validateParams(val, data.rules.entities[0], data.rules.conAry);
 				const sql = spliceInsertSQL({
 					entity: data.rules.entities[0],
 					isEdit,

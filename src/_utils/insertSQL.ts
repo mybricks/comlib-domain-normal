@@ -1,5 +1,5 @@
 import { Entity } from '../_types/domain';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType, FieldDBType } from '../_constants/field';
 import { getQuoteByFieldType } from './field';
 import { get } from './util';
 import { AnyType } from '../_types';
@@ -63,4 +63,61 @@ export const spliceInsertSQL = (params: {
 	});
 
 	return `${sql}(${fieldAry.join(',')}) VALUES ${res.map(valueAry => `(${valueAry.join(',')})`).join(', ')}`;
+};
+
+export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ from: string; to: string }>) => {
+	const values = Array.isArray(data) ? data : [data];
+	const fieldAry = entity.fieldAry.filter(field => conAry.find(con => con.to === `/${field.name}`));
+
+	for (let i = 0; i < values.length; i++) {
+		const params = values[i];
+
+		for (let j = 0; j < fieldAry.length; j++) {
+			const field = fieldAry[j];
+			const con = conAry.find(con => con.to === `/${field.name}`);
+			if (!con) { continue; }
+
+			const paramKeys = con.from.substring(con.from.indexOf('/') + 1).split('/');
+			const curValue = get(params, paramKeys);
+			if (curValue === undefined || curValue === null) { continue; }
+
+			/** 字符类型校验 */
+			if ((field.dbType === FieldDBType.VARCHAR || field.dbType === FieldDBType.MEDIUMTEXT)
+				&& field.bizType !== FieldBizType.ENUM
+				&& field.bizType !== FieldBizType.JSON
+				&& typeof curValue !== 'string'
+				&& typeof curValue !== 'number'
+			) {
+				throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 必须为字符串或数字类型');
+			}
+
+			/** 数字类型校验 */
+			if (field.dbType === FieldDBType.BIGINT && typeof curValue !== 'number' && parseInt(curValue) != curValue) {
+				throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 必须为数字类型');
+			}
+
+			/** 枚举值校验 */
+			if (field.bizType === FieldBizType.ENUM) {
+				const enumValues = field.enumValues ?? [];
+				
+				if (enumValues.length) {
+					let parsedValue = curValue;
+
+					try {
+						parsedValue = JSON.parse(parsedValue);
+					} catch (e) {}
+
+					if (Array.isArray(parsedValue)) {
+						for (let enumIndex = 0; enumIndex < parsedValue.length; enumIndex++) {
+							if (!enumValues.includes(parsedValue[enumIndex])) {
+								throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 中每一项必须为枚举值 ' + enumValues.join('/') + ' 其中之一');
+							}
+						}
+					} else if (!enumValues.includes(String(parsedValue))) {
+						throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 必须为枚举值 ' + enumValues.join('/') + ' 其中之一');
+					}
+				}
+			}
+		}
+	}
 };

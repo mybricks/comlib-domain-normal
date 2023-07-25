@@ -27,9 +27,10 @@ export const safeDecodeURIComponent = (content: string) => {
 
 export const get = (value, keys: string[] = []) => {
 	let curValue = value;
+	const depKeys = [...keys];
 
-	while (curValue !== undefined && keys.length) {
-		curValue = curValue?.[keys.shift() as string];
+	while (curValue !== undefined && depKeys.length) {
+		curValue = curValue?.[depKeys.shift() as string];
 	}
 
 	return curValue;
