@@ -178,8 +178,10 @@ export const depValidateEntity = (params: {
 					
 					const originMappingFieldIds = originField.mapping.entity?.fieldAry.map(f => f.id).sort().join(',');
 					const newMappingFieldIds = nowField.mapping.entity?.fieldAry.map(f => f.id).sort().join(',');
+					const originMappingFieldNames = originField.mapping.entity?.fieldAry.map(f => f.name).sort().join(',');
+					const newMappingFieldNames = nowField.mapping.entity?.fieldAry.map(f => f.name).sort().join(',');
 					
-					if (originMappingFieldIds !== newMappingFieldIds) {
+					if (originMappingFieldIds !== newMappingFieldIds || originMappingFieldNames !== newMappingFieldNames) {
 						return `实体【${originEntity.name}】中字段【${originField.name}】所映射数据存在变更`;
 					}
 				}
