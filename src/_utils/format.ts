@@ -64,7 +64,7 @@ export const spliceDataFormat = (fields: SelectedField[], entities: Entity[], ro
 				item.forEach(i => {
 					if (path[0].showFormat === 'JSON') {
 						try {
-							i[key] = i[key] ? safeParse(i[key]) : i[key];
+							i[key] = i[key] ? safeParse(i[key], i[key]) : i[key];
 						} catch (e) {}
 					} else {
 						i['_' + key] = i[key];
@@ -74,7 +74,7 @@ export const spliceDataFormat = (fields: SelectedField[], entities: Entity[], ro
 			} else {
 				if (path[0].showFormat === 'JSON') {
 					try {
-						item[key] = item[key] ? safeParse(item[key]) : item[key];
+						item[key] = item[key] ? safeParse(item[key], item[key]) : item[key];
 					} catch (e) {}
 				} else {
 					item['_' + key] = item[key];
