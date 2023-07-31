@@ -26,7 +26,7 @@ const getFieldIdsByConditions = (conditions, fieldIds) => {
 };
 
 /** 校验删除组件数据是否需要用户变更 */
-export const validateEntityForDelete = (entities: Entity[] = [], newEntity: any, conditions = []) => {
+export const validateEntityForDelete = (entities: Entity[] = [], newEntity: AnyType, conditions = []) => {
 	const curEntity = entities.find(e => e.selected);
 	
 	if (newEntity && curEntity && curEntity.id === newEntity.id) {
@@ -53,7 +53,7 @@ export const validateEntityForDelete = (entities: Entity[] = [], newEntity: any,
 };
 
 /** 校验实体是否存在变更 */
-export const validateEntity = (entities: Entity[], newEntity: Entity, options?: any) => {
+export const validateEntity = (entities: Entity[], newEntity: Entity, options?: AnyType) => {
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && newEntity && curEntity.id === newEntity.id) {
@@ -102,7 +102,7 @@ export const depValidateEntity = (params: {
 	entities: Entity[];
 	newEntity: Entity;
 	fields: SelectedField[];
-	conditions: any[];
+	conditions: AnyType[];
 	orders: SelectedField[];
 }) => {
 	const { entities, newEntity, fields = [], conditions, orders = [] } = params;
@@ -116,7 +116,7 @@ export const depValidateEntity = (params: {
 	
 	if (originEntity) {
 		const entityMap: Record<string, SelectedField[]> = {};
-		let whereFields: any[] = [];
+		let whereFields: AnyType[] = [];
 		const getFieldIdsByConditions = (conditions) => {
 			conditions.forEach(con => {
 				if (con.conditions) {
