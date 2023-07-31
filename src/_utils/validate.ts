@@ -1,5 +1,6 @@
-import {Entity, Field, SelectedField} from '../_types/domain';
-import {FieldBizType} from "../_constants/field";
+import { Entity, Field, SelectedField } from '../_types/domain';
+import { FieldBizType } from '../_constants/field';
+import { AnyType } from '../_types';
 
 const baseValidateField = (curEntity: Entity, originField: Field, nowField?: Field) => {
 	if (!nowField) {
@@ -13,7 +14,7 @@ const baseValidateField = (curEntity: Entity, originField: Field, nowField?: Fie
 	if (originField.bizType !== nowField.bizType || (originField.bizType === nowField.bizType && originField.dbType !== nowField.dbType)) {
 		return `实体【${curEntity.name}】中字段【${originField.name}】类型存在变更，由【${originField.typeLabel}】变更为【${nowField.typeLabel}】`;
 	}
-}
+};
 const getFieldIdsByConditions = (conditions, fieldIds) => {
 	conditions.forEach(con => {
 		if (con.conditions) {
@@ -184,6 +185,15 @@ export const depValidateEntity = (params: {
 					if (originMappingFieldIds !== newMappingFieldIds || originMappingFieldNames !== newMappingFieldNames) {
 						return `实体【${originEntity.name}】中字段【${originField.name}】所映射数据存在变更`;
 					}
+
+					for (const calcField of nowField.mapping.entity?.fieldAry?.filter(f => f.bizType === FieldBizType.CALC) ?? []) {
+						const originCalcField = originField.mapping.entity?.fieldAry?.find(f => f.id === calcField.id);
+
+						if ((originCalcField as AnyType)?.sql !== (calcField as AnyType)?.sql) {
+							return `实体【${originEntity.name}】中字段【${originField.name}】所映射数据存在变更`;
+						}
+					}
+
 				}
 			}
 		}

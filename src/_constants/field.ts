@@ -15,6 +15,8 @@ export enum FieldBizType {
 	SYS_USER = 'SYS_USER',
 	SYS_ROLE = 'SYS_ROLE',
 	SYS_ROLE_RELATION = 'SYS_ROLE_RELATION',
+	/** 计算字段 */
+	CALC = 'calc'
 }
 
 /** 数据库字段类型 */

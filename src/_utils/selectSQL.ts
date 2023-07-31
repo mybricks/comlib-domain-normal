@@ -2,8 +2,7 @@
 import { Condition, Entity, Field, Order, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
 import { getValueByOperatorAndFieldType } from './field';
-
-const joinArray = (...res) => Array.from(res);
+import { FieldBizType } from '../_constants/field';
 
 /** 根据条件拼接 where sql */
 const spliceWhereSQLFragmentByConditions = (fnParams: {
@@ -86,7 +85,7 @@ const spliceWhereSQLFragmentByConditions = (fnParams: {
 				const parentField = entityFieldMap[lastPath.entityId + lastPath.fieldId];
 				const isCountCondition = parentField.mapping?.condition?.startsWith('count(') && parentField.mapping?.condition?.endsWith(')');
 
-				fieldName = `MAPPING_${joinArray(...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), isCountCondition ? '总数' : field.name).join('_')}`;
+				fieldName = `MAPPING_${[...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), isCountCondition ? '总数' : field.name].join('_')}`;
 			}
 
 			let value = condition.value || '';
@@ -163,6 +162,12 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (entity.isSystem && !field.isPrivate) {
 					entityFieldMap[entity.id + field.name] = field;
 				}
+
+				if (field.mapping?.entity?.fieldAry?.length) {
+					field.mapping.entity.fieldAry
+						.filter(f => f.bizType === FieldBizType.CALC)
+						.forEach(f => entityFieldMap[field.mapping!.entity!.id + f.id] = f);
+				}
 			});
 		});
 		/** 数据查询语句 */
@@ -214,11 +219,36 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}
 		}).filter(Boolean) as AnyType as Order[];
 		/** 所有使用到的字段，类型定义为 SelectedField */
-		let allFields: SelectedField[] = joinArray(...fields, ...(orders as AnyType), ...conditionFields);
+		let allFields: SelectedField[] = [...fields, ...(orders as AnyType), ...conditionFields]
+			.reduce((pre, field) => {
+				const entityField = entityFieldMap[field.entityId + field.fieldId] as Field & { sql: string, hasHandle?: boolean };
+				/** 计算字段的前置路径，依赖于当前映射字段的 path */
+				const fromPathPrefix = field.fromPath.slice(0, -1);
+
+				if (entityField.bizType === FieldBizType.CALC && fromPathPrefix.length) {
+					if (!entityField.hasHandle) {
+						entityField.hasHandle = true;
+						/** 处理字段前缀，依赖于当前映射字段的 path */
+						entityField.sql = entityField.sql
+							.replace(/MAPPING_/g, `MAPPING_${
+								fromPathPrefix.map(f => entityFieldMap[f.entityId + f.fieldId].name)
+							}_`);
+					}
+					return [
+						...pre,
+						field,
+						...((entityField as AnyType).fields || []).map(f => {
+							return { ...f, fromPath: [...fromPathPrefix, ...f.fromPath] };
+						})
+					];
+				} else {
+					return [...pre, field];
+				}
+			}, []);
 		/** 所有使用到的字段的 Map */
 		const allFieldsMap: Record<string, boolean> = {};
 		allFields = allFields.filter(field => {
-			const paths = joinArray(...(field.fromPath || []).map(p => p.fieldId), field.fieldId).join('.');
+			const paths = [...(field.fromPath || []).map(p => p.fieldId), field.fieldId].join('.');
 
 			if (allFieldsMap[paths]) {
 				return false;
@@ -271,7 +301,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					return;
 				}
 
-				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, joinArray(...fromPath, parentField), originEntity);
+				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, [...fromPath, parentField], originEntity);
 				const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
 				const SEPARATOR = '$$';
 				let entityName = '';
@@ -279,23 +309,23 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				/** 关联，当前实体主动关联另一个实体，即当前实体字段存在一个字段作为外键关联另一个实体的主键（id） */
 				if (type === 'primary') {
 					const relationField = parentEntity.fieldAry.find(f => ['relation', 'SYS_USER', 'SYS_ROLE', 'SYS_ROLE_RELATION'].includes(f.bizType) && f.relationEntityId === originEntity.id && (parentField.bizType === 'mapping' ? true : f.id === parentField.id));
-					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
+					const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
 					/** 聚合为 json 的字段列表 */
 					let jsonFieldNameList: string[] = [];
 					/** 标识对应的 json 字段是否已被拼接 */
 					const jsonMappingFieldMap = {};
 					fields
-						.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id))
+						.filter(f => f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex))
 						.forEach(f => {
 							const currentField = entityFieldMap[f.entityId + f.fieldId];
-							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
+							const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
 
 							/** 字段来源于当前表中 */
 							if (f.fromPath.length - 1 === index) {
-								if (currentField.bizType !== 'mapping') {
+								if (![FieldBizType.MAPPING].includes(currentField.bizType)) {
 									/** 判断是否是映射字段，是则加 _ 标识 */
-									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
-									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									const isMapping = fields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.bizType === FieldBizType.CALC ? (currentField as AnyType).sql : currentField.name}`);
 								}
 							} else {
 								const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
@@ -309,22 +339,22 @@ export const spliceSelectSQLByConditions = (fnParams: {
 
 					/** 需要在子查询中返回的字段列表 */
 					const extraFieldNames = allFields
-						.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
+						.filter(f => f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
 						.map(f => {
 							const currentField = entityFieldMap[f.entityId + f.fieldId];
-							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
+							const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
 							const mappingFieldName = `MAPPING_${
-								joinArray(
+								[
 									...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)),
 									/** 查询总数逻辑定制 */
 									currentField.isPrimaryKey && f.fieldName === '总数' ? f.fieldName : currentField.name
-								).join('_')
+								].join('_')
 							}`;
 
 							/** 字段来源于当前表中 */
 							if (f.fromPath.length - 1 === index) {
-								if (currentField.bizType !== 'mapping') {
-									return `${currentField.name} AS ${mappingFieldName}`;
+								if (![FieldBizType.MAPPING].includes(currentField.bizType)) {
+									return `${currentField.bizType === FieldBizType.CALC ? (currentField as AnyType).sql : currentField.name} AS ${mappingFieldName}`;
 								}
 							} else {
 								/** 字段来源于子查询 */
@@ -335,7 +365,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.name)}.${(relationField?.name)}`;
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
-					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
+					const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
 					/** 被关联的关系字段 */
 					const curRelationFieldName = 'MAPPING_' + [mappingTableName, relationField?.name].join('_');
 					/** 聚合为 json 的字段列表 */
@@ -344,15 +374,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					const jsonMappingFieldMap = {};
 
 					fields
-						.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id))
+						.filter(f => f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex))
 						.forEach(f => {
 							const currentField = entityFieldMap[f.entityId + f.fieldId];
-							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
+							const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
 
 							if (f.fromPath.length - 1 === index) {
 								/** 判断是否是映射字段，是则加 _ 标识 */
-								const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
-								jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+								const isMapping = fields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+								jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.bizType === FieldBizType.CALC ? (currentField as AnyType).sql : currentField.name}`);
 							} else {
 								/** 聚合为 JSON 时，字段取父字段的名称，如 MAPPING_A_B_C，取名称 B */
 								const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
@@ -369,19 +399,21 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							.filter(f => {
 								const entityField = entityFieldMap[f.entityId + f.fieldId];
 
-								return f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
 							})
 							.map(f => {
-								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name).join('_')}`;
+								const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
+								const currentField = entityFieldMap[f.entityId + f.fieldId];
+								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name].join('_')}`;
 
 								if (f.fromPath.length - 1 === index) {
-									return `GROUP_CONCAT(${entityFieldMap[f.entityId + f.fieldId].name} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
-								} else {
+									return `GROUP_CONCAT(${currentField.bizType === FieldBizType.CALC ? (currentField as AnyType).sql : currentField.name} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
+								} else if (currentField.bizType !== FieldBizType.MAPPING) {
 									/** GROUP_CONCAT 必须保留，因为外层 where 条件中会使用 */
 									return `GROUP_CONCAT(${mappingFieldName} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
 								}
-							});
+							})
+							.filter(Boolean);
 
 						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					} else if (isMaxCondition) {
@@ -392,18 +424,20 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							.filter(f => {
 								const entityField = entityFieldMap[f.entityId + f.fieldId];
 
-								return f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
 							})
 							.map(f => {
-								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name).join('_')}`;
+								const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
+								const currentField = entityFieldMap[f.entityId + f.fieldId];
+								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name].join('_')}`;
 
 								if (f.fromPath.length - 1 === index) {
-									return `${entityFieldMap[f.entityId + f.fieldId].name} AS ${mappingFieldName}`;
-								} else {
+									return `${currentField.bizType === FieldBizType.CALC ? (currentField as AnyType).sql : currentField.name} AS ${mappingFieldName}`;
+								} else if (currentField.bizType !== FieldBizType.MAPPING) {
 									return mappingFieldName;
 								}
-							});
+							})
+							.filter(Boolean);
 
 						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${getTableName(originEntity.name)} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					} else if (condition.startsWith('count(') && condition.endsWith(')')) {
@@ -498,7 +532,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					const parentField = entityFieldMap[lastPath.entityId + lastPath.fieldId];
 					const isCountCondition = parentField.mapping?.condition?.startsWith('count(') && parentField.mapping?.condition?.endsWith(')');
 
-					orderList.push(`MAPPING_${joinArray(...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), isCountCondition ? '总数' : entityField.name).join('_')} ${order.order}`);
+					orderList.push(`MAPPING_${[...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), isCountCondition ? '总数' : entityField.name].join('_')} ${order.order}`);
 				} else {
 					orderList.push(`${entityField.name} ${order.order}`);
 				}
