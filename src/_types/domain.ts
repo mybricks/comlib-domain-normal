@@ -75,4 +75,6 @@ export interface SelectedField {
 	/** 实体ID */
 	entityId: string;
 	fromPath: SelectedField[];
+	/** 标识字段来自计算字段所使用到的字段 */
+	fromCalcField?: SelectedField;
 }

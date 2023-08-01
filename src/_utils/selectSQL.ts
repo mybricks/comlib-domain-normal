@@ -182,42 +182,60 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			condition.forEach(con => {
 				if (con.conditions) {
 					formatCondition(con.conditions);
-				} else {
-					con.fieldId && conditionFields.push(con as AnyType);
+				} else if (con.fieldId) {
+					conditionFields.push(con as AnyType);
+
+					conditionFields.push(
+						...con.fromPath.slice(1).map((path, index) => {
+							return { ...path, fromPath: con.fromPath.slice(0, index + 1) };
+						})
+					);
 				}
 			});
 		};
 		formatCondition([conditions]);
 
 		/** 排序可按照 fieldId 或 fieldName */
-		orders = orders.map(order => {
-			if (order.fieldId) {
-				return { ...order, fromPath: order.fromPath || [] };
-			} else if (order.fieldName) {
-				/** 前端传入的排序，根据排序字段名称（如： 物料.物料ID）匹配出 Order 类型数据 */
-				const names = String(order.fieldName).split('.');
-				const fieldPath: SelectedField[] = [];
-				let nowEntity: Entity | undefined = curEntity;
-				while (names.length) {
-					if (!nowEntity) {
-						return;
+		orders = orders
+			.map(order => {
+				if (order.fieldId) {
+					return { ...order, fromPath: order.fromPath || [] };
+				} else if (order.fieldName) {
+					/** 前端传入的排序，根据排序字段名称（如： 物料.物料ID）匹配出 Order 类型数据 */
+					const names = String(order.fieldName).split('.');
+					const fieldPath: SelectedField[] = [];
+					let nowEntity: Entity | undefined = curEntity;
+					while (names.length) {
+						if (!nowEntity) {
+							return;
+						}
+
+						const curName = names.shift();
+						const curField = nowEntity.fieldAry.find(field => field.name === curName);
+
+						if (!curField) {
+							return;
+						}
+						fieldPath.push({ fieldId: curField.id, entityId: nowEntity.id, fieldName: curField.name, fromPath: [] });
+						nowEntity = entityMap[curField.mapping?.entity?.id];
 					}
 
-					const curName = names.shift();
-					const curField = nowEntity.fieldAry.find(field => field.name === curName);
-
-					if (!curField) {
-						return;
+					if (fieldPath.length) {
+						return { ...fieldPath.pop(), order: order.order, fromPath: fieldPath };
 					}
-					fieldPath.push({ fieldId: curField.id, entityId: nowEntity.id, fieldName: curField.name, fromPath: [] });
-					nowEntity = entityMap[curField.mapping?.entity?.id];
 				}
-
-				if (fieldPath.length) {
-					return { ...fieldPath.pop(), order: order.order, fromPath: fieldPath };
-				}
-			}
-		}).filter(Boolean) as AnyType as Order[];
+			})
+			.filter(Boolean)
+			/** @ts-ignore */
+			.reduce((pre, order: Order) => {
+				return [
+					...pre,
+					order,
+					...order.fromPath.slice(1).map((path, index) => {
+						return { ...path, fromPath: order.fromPath.slice(0, index + 1) };
+					})
+				];
+			}, []) as AnyType as Order[];
 		/** 所有使用到的字段，类型定义为 SelectedField */
 		let allFields: SelectedField[] = [...fields, ...(orders as AnyType), ...conditionFields]
 			.reduce((pre, field) => {
@@ -225,8 +243,8 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				/** 计算字段的前置路径，依赖于当前映射字段的 path */
 				const fromPathPrefix = field.fromPath.slice(0, -1);
 
-				if (entityField.bizType === FieldBizType.CALC && fromPathPrefix.length) {
-					if (!entityField.hasHandle) {
+				if (entityField.bizType === FieldBizType.CALC) {
+					if (!entityField.hasHandle && fromPathPrefix.length) {
 						entityField.hasHandle = true;
 						/** 处理字段前缀，依赖于当前映射字段的 path */
 						entityField.sql = entityField.sql
@@ -238,7 +256,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						...pre,
 						field,
 						...((entityField as AnyType).fields || []).map(f => {
-							return { ...f, fromPath: [...fromPathPrefix, ...f.fromPath] };
+							return { ...f, fromCalcField: field, fromPath: [...fromPathPrefix, ...f.fromPath] };
 						})
 					];
 				} else {
@@ -246,17 +264,19 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				}
 			}, []);
 		/** 所有使用到的字段的 Map */
-		const allFieldsMap: Record<string, boolean> = {};
-		allFields = allFields.filter(field => {
+		const allFieldsMap: Record<string, SelectedField> = {};
+		allFields.forEach(field => {
 			const paths = [...(field.fromPath || []).map(p => p.fieldId), field.fieldId].join('.');
 
-			if (allFieldsMap[paths]) {
-				return false;
+			if (!allFieldsMap[paths]) {
+				allFieldsMap[paths] = field;
+			} else {
+				if (allFieldsMap[paths].fromCalcField && !field.fromCalcField) {
+					allFieldsMap[paths].fromCalcField = undefined;
+				}
 			}
-
-			allFieldsMap[paths] = true;
-			return true;
 		});
+		allFields = Object.values(allFieldsMap);
 		/** 当前实体中被使用到的字段 ID */
 		const curFieldIds = allFields
 			.map(field => {
@@ -339,7 +359,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 
 					/** 需要在子查询中返回的字段列表 */
 					const extraFieldNames = allFields
-						.filter(f => f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
+						.filter(f => (f.fromCalcField ? f.fromCalcField.fromPath.length < depIndex : true) && f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
 						.map(f => {
 							const currentField = entityFieldMap[f.entityId + f.fieldId];
 							const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
@@ -399,7 +419,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							.filter(f => {
 								const entityField = entityFieldMap[f.entityId + f.fieldId];
 
-								return f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return (f.fromCalcField ? f.fromCalcField.fromPath.length < depIndex : true) && f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
 							})
 							.map(f => {
 								const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
@@ -424,7 +444,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							.filter(f => {
 								const entityField = entityFieldMap[f.entityId + f.fieldId];
 
-								return f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return (f.fromCalcField ? f.fromCalcField.fromPath.length < depIndex : true) && f.fromPath.find((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
 							})
 							.map(f => {
 								const index = f.fromPath.findIndex((path, idx) => path.fieldId === parentField.id && path.entityId === parentEntity.id && idx + 1 === depIndex);
