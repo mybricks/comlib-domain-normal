@@ -1,5 +1,5 @@
 /** 根据字段类型返回拼接 sql 的具体指 */
-import { FieldDBType } from '../_constants/field';
+import { FieldDBType, SQLOperator } from '../_constants/field';
 
 export const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
@@ -12,10 +12,12 @@ export const getValueByFieldType = (dbType: string, val: string) => {
 
 /** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 export const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
-	if (operator === 'LIKE' || operator === 'NOT LIKE') {
+	if ([SQLOperator.LIKE, SQLOperator.NOT_LIKE].includes(operator as SQLOperator)) {
 		return `'%${val}%'`;
-	} else if (operator === 'IN' || operator === 'NOT IN') {
+	} else if ([SQLOperator.IN, SQLOperator.NOT_IN].includes(operator as SQLOperator)) {
 		return `(${(Array.isArray(val) ? val : String(val).split(',')).map(item => getValueByFieldType(dbType, item)).join(',')})`;
+	} else if ([SQLOperator.IS_NOT_NULL, SQLOperator.IS_NULL].includes(operator as SQLOperator)) {
+		return '';
 	}
 
 	return getValueByFieldType(dbType, val);

@@ -2,7 +2,7 @@
 import { Condition, Entity, Field, Order, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
 import { getValueByOperatorAndFieldType } from './field';
-import { FieldBizType } from '../_constants/field';
+import { FieldBizType, SQLOperator } from '../_constants/field';
 
 /** 根据条件拼接 where sql */
 const spliceWhereSQLFragmentByConditions = (fnParams: {
@@ -54,7 +54,7 @@ const spliceWhereSQLFragmentByConditions = (fnParams: {
 						return value !== undefined;
 					}
 				} else {
-					return condition?.value !== undefined;
+					return [SQLOperator.IS_NOT_NULL, SQLOperator.IS_NULL].includes(condition?.operator as SQLOperator) ? true : condition?.value !== undefined;
 				}
 			}
 
