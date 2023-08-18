@@ -16,6 +16,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 					entities: data.rules.entities,
 					params: val,
 					isEdit,
+					encrypt: env.encrypt,
 				});
 
 	      env.executeSql(sql)

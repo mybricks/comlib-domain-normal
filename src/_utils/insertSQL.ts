@@ -9,11 +9,12 @@ export const spliceInsertSQL = (params: {
 	conAry: Array<{ from: string; to: string }>;
 	isEdit?: boolean;
 	genUniqueId(): number;
+	encrypt(str: string): string;
 	data: Record<string, AnyType> | Array<Record<string, AnyType>>;
 	/** 批量插入 */
 	batch?: boolean;
 }) => {
-	const { entity, conAry, isEdit, genUniqueId, data, batch } = params;
+	const { entity, conAry, isEdit, genUniqueId, encrypt, data, batch } = params;
 	const sql = `INSERT INTO ${entity.name}${isEdit ? '' : '__VIEW'} `;
 
 	const res: string[][] = [];
@@ -34,9 +35,9 @@ export const spliceInsertSQL = (params: {
 					if (value === undefined || value === null) {
 						valueAry.push('null');
 					} else if (Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]') {
-						valueAry.push(`${q}${JSON.stringify(value)}${q}`);
+						valueAry.push(`${q}${JSON.stringify(field.useEncrypt ? encrypt(value) : value)}${q}`);
 					} else {
-						valueAry.push(`${q}${value}${q}`);
+						valueAry.push(`${q}${field.useEncrypt ? encrypt(value) : value}${q}`);
 					}
 				} else {
 					if (field.isPrimaryKey) {
@@ -51,7 +52,7 @@ export const spliceInsertSQL = (params: {
 					} else if (field.defaultValueWhenCreate !== undefined && field.defaultValueWhenCreate !== null) {
 						const q = getQuoteByFieldType(field.dbType);
 
-						valueAry.push(`${q}${field.defaultValueWhenCreate}${q}`);
+						valueAry.push(`${q}${field.useEncrypt ? encrypt(field.defaultValueWhenCreate) : field.defaultValueWhenCreate}${q}`);
 					} else {
 						valueAry.push('null');
 					}

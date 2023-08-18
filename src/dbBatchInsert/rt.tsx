@@ -15,6 +15,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 					batch: true,
 					conAry: data.rules.conAry,
 					genUniqueId: env.genUniqueId,
+					encrypt: env.encrypt,
 				});
 			  env.executeSql(sql)
 			    .then(data => outputs['rtn'](data.insertId || data.rows?.[0]?.insertId))

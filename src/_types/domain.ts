@@ -45,7 +45,13 @@ export interface Field {
 	/** 查询数据时格式化类型 */
 	showFormat: string;
 	/** 枚举值 */
-	enumValues?: string[]
+	enumValues?: string[];
+	/** 加密 */
+	useEncrypt?: boolean;
+	/** 不能为空 */
+	notNull?: boolean;
+	/** 是否使用索引 */
+	useIndex?: boolean;
 }
 
 export interface Condition {

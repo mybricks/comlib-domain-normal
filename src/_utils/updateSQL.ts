@@ -9,8 +9,9 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 	connectors: Array<{ from: string; to: string }>;
 	entity: Entity;
 	params: Record<string, unknown>;
+	encrypt(str: string): string;
 }) => {
-	const { connectors, entity, params } = fnParams;
+	const { connectors, entity, params, encrypt } = fnParams;
 	return connectors
 		.map(connector => {
 			const { from, to } = connector;
@@ -29,7 +30,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 				return '';
 			}
 
-			return `, ${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(value) : value}${q}`}`;
+			return `, ${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
 		})
 		.filter(Boolean)
 		.join('');
@@ -41,8 +42,9 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 	entities: Entity[];
 	params: Record<string, unknown>;
 	isEdit?: boolean;
+	encrypt(str: string): string;
 }) => {
-	const { conditions, entities, params, connectors, isEdit } = fnParams;
+	const { conditions, entities, params, connectors, isEdit, encrypt } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
 	const curEntity = entities.find(e => e.selected);
@@ -56,6 +58,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 			connectors,
 			entity: curEntity,
 			params,
+			encrypt,
 		}));
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
