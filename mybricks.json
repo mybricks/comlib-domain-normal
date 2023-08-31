@@ -7,6 +7,7 @@
     "./src/dbInsert/com.json",
     "./src/dbBatchInsert/com.json",
     "./src/dbUpdate/com.json",
+    "./src/dbBatchUpdate/com.json",
     "./src/dbDelete/com.json",
     "./src/code-segment/com.json",
     "./src/_var/com.json",

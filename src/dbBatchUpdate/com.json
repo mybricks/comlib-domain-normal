@@ -1,0 +1,31 @@
+{
+  "title": "批量更新数据",
+  "namespace": "mybricks.domain.dbBatchUpdate",
+  "author": "CheMingjun",
+  "author_name": "车明君",
+  "version": "1.0.0",
+  "description": "向数据库中批量更新数据",
+  "icon": "./icon.svg",
+  "runtime": "./rt.tsx",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "params",
+      "title": "参数",
+      "schema": {
+        "type": "follow"
+      },
+      "rels": [
+        "rtn"
+      ],
+      "editable": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "rtn",
+      "title": "成功"
+    }
+  ]
+}
