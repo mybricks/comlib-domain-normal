@@ -10,6 +10,7 @@
     "./src/dbBatchUpdate/com.json",
     "./src/dbDelete/com.json",
     "./src/code-segment/com.json",
+    "./src/_service/com.json",
     "./src/_var/com.json",
     "./src/_muilt-inputJs/com.json",
     "./src/requestHeader/com.json"
