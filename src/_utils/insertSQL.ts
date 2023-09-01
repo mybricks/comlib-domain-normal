@@ -83,10 +83,10 @@ export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ fr
 			if (curValue === undefined || curValue === null) {
 				/** 新建场景下，字段设置不能为空，且没有默认值 */
 				if (isInsert && field.notNull && !field.defaultValueWhenCreate) {
-					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能未空');
+					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能为空');
 				} else if (!isInsert && field.notNull && curValue === null) {
 					/** 更新场景下，字段设置不能为空，且值为 null */
-					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能未空');
+					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能为空');
 				} else {
 					continue;
 				}
