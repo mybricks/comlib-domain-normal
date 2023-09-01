@@ -86,6 +86,14 @@ export const validateEntity = (entities: Entity[], newEntity: Entity, options?: 
 			if (originField.defaultValueWhenCreate !== nowField.defaultValueWhenCreate) {
 				return `实体【${curEntity.name}】中字段【${originField.name}】默认值存在变更`;
 			}
+
+			if (originField.useEncrypt !== nowField.useEncrypt) {
+				return `实体【${curEntity.name}】中字段【${originField.name}】加密方式存在变更`;
+			}
+
+			if (originField.notNull !== nowField.notNull) {
+				return `实体【${curEntity.name}】中字段【${originField.name}】非空判断方式存在变更`;
+			}
 			
 			if (
 				originField.bizType === FieldBizType.ENUM
