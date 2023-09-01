@@ -66,7 +66,7 @@ export const spliceInsertSQL = (params: {
 	return `${sql}(${fieldAry.join(',')}) VALUES ${res.map(valueAry => `(${valueAry.join(',')})`).join(', ')}`;
 };
 
-export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ from: string; to: string }>) => {
+export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ from: string; to: string }>, isInsert = true) => {
 	const values = Array.isArray(data) ? data : [data];
 	const fieldAry = entity.fieldAry.filter(field => conAry.find(con => con.to === `/${field.name}`));
 
@@ -80,7 +80,17 @@ export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ fr
 
 			const paramKeys = con.from.substring(con.from.indexOf('/') + 1).split('/');
 			const curValue = get(params, paramKeys);
-			if (curValue === undefined || curValue === null) { continue; }
+			if (curValue === undefined || curValue === null) {
+				/** 新建场景下，字段设置不能为空，且没有默认值 */
+				if (isInsert && field.notNull && !field.defaultValueWhenCreate) {
+					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能未空');
+				} else if (!isInsert && field.notNull && curValue === null) {
+					/** 更新场景下，字段设置不能为空，且值为 null */
+					throw new Error('请求参数字段 ' + paramKeys.join('.') + ' 不能未空');
+				} else {
+					continue;
+				}
+			}
 
 			/** 字符类型校验 */
 			if ((field.dbType === FieldDBType.VARCHAR || field.dbType === FieldDBType.MEDIUMTEXT)

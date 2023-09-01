@@ -9,7 +9,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 		
 	  if (data.rules) {
 		  try {
-				validateParams(val, data.rules.entities[0], data.rules.conAry);
+				validateParams(val, data.rules.entities[0], data.rules.conAry, false);
 			  const sql = spliceUpdateSQLByConditions({
 					conditions: data.rules.conditions,
 					connectors: data.rules.conAry,

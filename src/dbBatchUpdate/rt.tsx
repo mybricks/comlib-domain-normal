@@ -13,8 +13,8 @@ export default function ({ env, data, outputs, inputs, onError }) {
 					throw new Error('输入数据错误，非数组或数字为空');
 				}
 
+				validateParams(val, data.rules.entities[0], data.rules.conAry, false);
 				for (const item of val) {
-					validateParams(item, data.rules.entities[0], data.rules.conAry);
 					const sql = spliceUpdateSQLByConditions({
 						conditions: data.rules.conditions,
 						connectors: data.rules.conAry,
