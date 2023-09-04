@@ -1,0 +1,24 @@
+{
+  "visibility": false,
+  "title": "结束",
+  "namespace": "mybricks.domain.end",
+  "author": "CheMingjun",
+  "author_name": "车明君",
+  "version": "1.0.0",
+  "description": "结束节点，自定义返回数据",
+  "icon": "./icon.svg",
+  "data": "./data.json",
+  "runtime": "./runtime.tsx",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "customResponse",
+      "title": "响应值",
+      "schema": {
+        "type": "follow"
+      },
+      "editable": true
+    }
+  ]
+}
