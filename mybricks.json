@@ -9,6 +9,7 @@
     "./src/dbUpdate/com.json",
     "./src/dbBatchUpdate/com.json",
     "./src/dbDelete/com.json",
+    "./src/getAuthUser/com.json",
     "./src/_end/com.json",
     "./src/code-segment/com.json",
     "./src/_service/com.json",

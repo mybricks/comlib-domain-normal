@@ -1,10 +1,10 @@
 {
-  "title": "结束",
-  "namespace": "mybricks.domain.end",
+  "title": "获取用户信息",
+  "namespace": "mybricks.domain.getAuthUser",
   "author": "CheMingjun",
   "author_name": "车明君",
   "version": "1.0.0",
-  "description": "结束节点，自定义返回数据",
+  "description": "获取用户信息，透传输入数据",
   "icon": "./icon.svg",
   "data": "./data.json",
   "runtime": "./runtime.tsx",
@@ -12,12 +12,18 @@
   "rtType": "js",
   "inputs": [
     {
-      "id": "customResponse",
-      "title": "响应值",
+      "id": "inputValue",
+      "title": "输入值",
       "schema": {
         "type": "follow"
       },
       "editable": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "rtn",
+      "title": "成功"
     }
   ]
 }
