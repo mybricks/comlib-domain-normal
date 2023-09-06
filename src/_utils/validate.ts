@@ -26,12 +26,16 @@ const getFieldIdsByConditions = (conditions, fieldIds) => {
 };
 
 /** 校验删除组件数据是否需要用户变更 */
-export const validateEntityForDelete = (entities: Entity[] = [], newEntity: AnyType, conditions = []) => {
+export const validateEntityForDelete = (entities: Entity[] = [], newEntity: Entity, conditions = []) => {
 	const curEntity = entities.find(e => e.selected);
 	
 	if (newEntity && curEntity && curEntity.id === newEntity.id) {
 		const fieldIds: string[] = [];
 		getFieldIdsByConditions([conditions], fieldIds);
+
+		if (newEntity._destroyed) {
+			return `实体【${newEntity.name}】已删除`;
+		}
 		
 		if (curEntity.name !== newEntity.name) {
 			return `实体名存在变更，由【${curEntity.name}】变更为【${newEntity.name}】`;
@@ -57,6 +61,10 @@ export const validateEntity = (entities: Entity[], newEntity: Entity, options?: 
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && newEntity && curEntity.id === newEntity.id) {
+		if (newEntity._destroyed) {
+			return `实体【${newEntity.name}】已删除`;
+		}
+
 		let willAffectedFields = curEntity.fieldAry;
 		
 		/** 更新数据组件只判断所使用到的字段 */
@@ -146,6 +154,10 @@ export const depValidateEntity = (params: {
 		const usedFieldIds = entityMap[newEntity.id]?.map(f => f.fieldId) || [];
 		
 		if (usedFieldIds.length) {
+			if (newEntity._destroyed) {
+				return `实体【${newEntity.name}】已删除`;
+			}
+
 			const willAffectedFields = originEntity.fieldAry.filter(f => usedFieldIds.includes(f.id));
 			
 			if (originEntity.name !== newEntity.name) {

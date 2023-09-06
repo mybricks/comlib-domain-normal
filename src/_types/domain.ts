@@ -11,6 +11,9 @@ export interface Entity {
 	/** 是否被选中 */
 	selected?: boolean;
 	isSystem?: boolean;
+
+	/** 在编辑器 envChanged 事件回掉里会存在，判断实体是否被删除 */
+	_destroyed?: boolean;
 }
 
 export interface Field {
