@@ -12,7 +12,7 @@ const setOutputSchema = ({ data, input, output, schema = null }) => {
 	if (data.merge && inputSchema && inputSchema.type === 'object') {
 		output.get('rtn').setSchema({ ...inputSchema, properties: { ...inputSchema.properties, userId: { type: 'number' } } });
 	} else {
-		output.get('rtn').setSchema({ type: 'number' });
+		output.get('rtn').setSchema({ type: 'object', properties: { userId: { type: 'number' } } });
 	}
 };
 
