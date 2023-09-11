@@ -17,6 +17,9 @@
       "schema": {
         "type": "follow"
       },
+      "rels": [
+        "rtn"
+      ],
       "editable": true
     }
   ],
