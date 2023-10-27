@@ -8,7 +8,8 @@
  */
 
 export default {
-	'@inputUpdated': ({ data, input, output, setAutoRun, isAutoRun }, { id, title, schema }) => {
+	'@inputUpdated': ({ output }
+		, { id, schema }) => {
 		if (id === 'set') {
 			const returnPin = output.get('return');
 			returnPin.setSchema(schema);//follow
@@ -17,9 +18,7 @@ export default {
 			changedPin.setSchema(schema);//follow
 		}
 	},
-	'@inputDisConnected': ({ data, input, output, setAutoRun, isAutoRun }
-		, from: { id, title, schema, parent }
-		, to: { id, title, schema, parent }) => {
+	'@inputDisConnected': ({ output }, from: { id, title, schema, parent }, to: { id, title, schema, parent }) => {
 		if (to.id === 'set') {
 			const returnPin = output.get('return');
 			returnPin.setSchema({ type: 'unknown' });
@@ -35,42 +34,25 @@ export default {
 			value: {
 				get({ title }) {
 					return title;
-				}, set({ setTitle }, title) {
+				},
+				set({ setTitle }, title) {
 					setTitle(title);
 				}
 			}
 		},
-		null,
 		{
 			title: '类型',
 			type: '_schema',
 			value: {
-				get({ data, outputs }) {
+				get({ outputs }) {
 					const returnPin = outputs.get('return');
 					return returnPin.schema;
-				}, set({ data, outputs }, schema) {
+				},
+				set({ outputs }, schema) {
 					const allPins = outputs.get();
 					allPins.forEach(pin => {
 						outputs.get(pin.id).setSchema(schema);
 					});
-				}
-			}
-		},
-		{
-			title: '初始值',
-			type: '_schemaValue',
-			desc: '变量最初的取值',
-			options({ outputs }) {
-				const returnPin = outputs.get('return');
-				return {
-					schema: returnPin.schema
-				};
-			},
-			value: {
-				get({ data }) {
-					return data.initValue;
-				}, set({ data }, tData) {
-					data.initValue = tData;
 				}
 			}
 		}

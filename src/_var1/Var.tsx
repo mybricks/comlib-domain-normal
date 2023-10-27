@@ -1,4 +1,4 @@
-export default function ({ data, outputs, inputs }) {
+export default function ({ env, data, outputs, inputs, _notifyBindings }) {
 	inputs['get']((val, relOutpus) => {
 		const nowVal = data.val !== void 0 ? data.val : data.initValue;
 		const cv = clone(nowVal);
@@ -10,6 +10,7 @@ export default function ({ data, outputs, inputs }) {
 		data.val = val;
 		const cVal = clone(val);
 		outputs['changed'](cVal, true);//notify all forked coms
+		_notifyBindings(cVal);
 
 		relOutpus['return'](cVal);
 	});
@@ -17,8 +18,13 @@ export default function ({ data, outputs, inputs }) {
 	inputs['reset'](() => {
 		const val = data.initValue;
 		data.val = val;
-		outputs['changed'](clone(val), true);//notify all forked coms
+		const cVal = clone(val);
+
+		outputs['changed'](cVal, true);//notify all forked coms
+		_notifyBindings(cVal);
 	});
+
+	// outputs['changed'](data.val)
 }
 
 function clone(val) {
@@ -27,7 +33,6 @@ function clone(val) {
 			if (val instanceof FormData) {
 				return val;
 			}
-
 			return JSON.parse(JSON.stringify(val));
 		} catch (ex) {
 			return val;
