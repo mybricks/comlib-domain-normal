@@ -70,9 +70,9 @@ export default {
 						}
 					},
 					autoSave: false,
-					onBlur: () => {
-						updateOutputSchema(output, data.fns);
-					}
+					// onBlur: () => {
+					// 	updateOutputSchema(output, data.fns);
+					// }
 				};
 				return option;
 			},
