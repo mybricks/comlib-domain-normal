@@ -27,10 +27,7 @@
       "title": "赋值",
       "schema": {
         "type": "follow"
-      },
-      "rels": [
-        "return"
-      ]
+      }
     },
     {
       "id": "reset",

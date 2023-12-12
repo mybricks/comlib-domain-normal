@@ -11,7 +11,7 @@ export default function ({ data, outputs, inputs }) {
 		const cVal = clone(val);
 		outputs['changed'](cVal, true);//notify all forked coms
 
-		relOutpus['return'](cVal);
+		// relOutpus['return'](cVal);
 	});
 
 	inputs['reset'](() => {
