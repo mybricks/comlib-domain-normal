@@ -17,5 +17,5 @@
     "./src/_muilt-inputJs/com.json",
     "./src/requestHeader/com.json"
   ],
-  "target": "node"
+  "target": "nodejs"
 }
