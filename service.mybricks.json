@@ -1,0 +1,6 @@
+{
+  "comAry": [
+    "./service/_muilt-inputJs/com.json"
+  ],
+  "target": "nodejs"
+}
