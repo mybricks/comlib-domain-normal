@@ -13,6 +13,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 				}
 
 				validateParams(val, data.rules.entities[0], data.rules.conAry);
+				env.collect('批量插入数据 params: ', val)
 			  const sql = spliceInsertSQL({
 					entity: data.rules.entities[0],
 					isEdit,
@@ -22,8 +23,12 @@ export default function ({ env, data, outputs, inputs, onError }) {
 					genUniqueId: env.genUniqueId,
 					encrypt: env.encrypt,
 				});
+				env.collect('批量插入数据 sql: ', sql)
 			  env.executeSql(sql)
-			    .then(data => outputs['rtn'](data.insertId || data.rows?.[0]?.insertId))
+			    .then(data => {
+						env.collect('批量插入数据 res: ', data)
+						outputs['rtn'](data.insertId || data.rows?.[0]?.insertId)
+					})
 			    .catch(ex => onError(`执行SQL发生错误, ${ex?.message}`));
 		  } catch (error: AnyType) {
 			  isEdit ? console.error('执行SQL发生错误, ', error) : undefined;

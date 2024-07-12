@@ -13,7 +13,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 }) => {
 	const { connectors, entity, params, encrypt } = fnParams;
 	return connectors
-		.map(connector => {
+		.map((connector, index) => {
 			const { from, to } = connector;
 			const toFieldName = to.replace('/', '');
 			const field = entity.fieldAry.find(f => f.name === toFieldName);
@@ -30,7 +30,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 				return '';
 			}
 
-			return `, ${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
+			return `${index ? ', ' : ''}${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
 		})
 		.filter(Boolean)
 		.join('');
@@ -53,7 +53,8 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name}${isEdit ? '' : '__VIEW'} SET _UPDATE_USER_ID = "", _UPDATE_TIME = ${Date.now()}`);
+		// sql.push(`UPDATE ${curEntity.name}${isEdit ? '' : '__VIEW'} SET _UPDATE_USER_ID = "", _UPDATE_TIME = ${Date.now()}`);
+		sql.push(`UPDATE ${curEntity.id} SET`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,

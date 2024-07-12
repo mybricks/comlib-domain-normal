@@ -55,6 +55,10 @@ export interface Field {
 	notNull?: boolean;
 	/** 是否使用索引 */
 	useIndex?: boolean;
+	/**
+	 * auto_increment 自增
+	 */
+	extra?: 'auto_increment';
 }
 
 export interface Condition {

@@ -19,8 +19,11 @@ export default function ({ env, data, outputs, inputs, onError }) {
 	};
 
 	const select = async (params) => {
+		env.collect('查询数据总数 params: ', params)
 		const [, countSql] = spliceSelectSQLByConditions(params) || [];
+		env.collect('查询数据总数 countSql: ', countSql)
 		const { rows: countRows } = await env.executeSql(countSql);
+		env.collect('查询数据总数 res: ', { rows: countRows })
 
 		return { total: countRows[0] ? countRows[0].total : 0 };
 	};

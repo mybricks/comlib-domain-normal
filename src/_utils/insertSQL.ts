@@ -15,10 +15,11 @@ export const spliceInsertSQL = (params: {
 	batch?: boolean;
 }) => {
 	const { entity, conAry, isEdit, genUniqueId, encrypt, data, batch } = params;
-	const sql = `INSERT INTO ${entity.name}${isEdit ? '' : '__VIEW'} `;
+	// const sql = `INSERT INTO ${entity.name}${isEdit ? '' : '__VIEW'} `;
+	const sql = `INSERT INTO ${entity.id} `;
 
 	const res: string[][] = [];
-	const fieldAry = entity.fieldAry.filter(field => field.bizType !== FieldBizType.MAPPING).map(field => field.name);
+	const fieldAry = entity.fieldAry.filter(field => (field.bizType !== FieldBizType.MAPPING)).filter(field => (field.isPrimaryKey ? field.extra !== 'auto_increment' : true)).map(field => field.name);
 
 	(batch ? data : [data]).forEach(item => {
 		const valueAry: string[] = [];
@@ -41,7 +42,9 @@ export const spliceInsertSQL = (params: {
 					}
 				} else {
 					if (field.isPrimaryKey) {
-						valueAry.push(String(genUniqueId()));
+						if (field.extra !== 'auto_increment') {
+							valueAry.push(String(genUniqueId()));
+						}
 					} else if (field.name === '_STATUS_DELETED') {
 						valueAry.push('0');
 					} else if (

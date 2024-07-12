@@ -22,12 +22,16 @@ export default function ({ env, data, outputs, inputs, onError }) {
 	};
 
 	const select = async (params) => {
+		env.collect('分页查询数据 params: ', params)
 		const [sql, countSql] = spliceSelectSQLByConditions(params) || [];
+		env.collect('分页查询数据 sql: ', { sql, countSql })
 
 		let { rows } = await env.executeSql(sql);
+		env.collect('分页查询数据 res: ', { rows })
 		rows = Array.from(rows || []);
 		spliceDataFormat(params.fields || [], params.entities, rows);
 		const { rows: countRows } = await env.executeSql(countSql);
+		env.collect('分页查询数据 res: ', { rows: countRows })
 
 		return {
 			dataSource: rows,

@@ -10,6 +10,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 	  if (data.rules) {
 		  try {
 				validateParams(val, data.rules.entities[0], data.rules.conAry, false);
+				env.collect('更新数据 params: ', val)
 			  const sql = spliceUpdateSQLByConditions({
 					conditions: data.rules.conditions,
 					connectors: data.rules.conAry,
@@ -18,6 +19,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 					isEdit,
 					encrypt: env.encrypt,
 				});
+				env.collect('更新数据 sql: ', sql)
 
 	      env.executeSql(sql)
 	        .then(() => outputs['rtn']())

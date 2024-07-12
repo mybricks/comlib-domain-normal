@@ -1,13 +1,36 @@
 /** 根据字段类型返回拼接 sql 的具体指 */
 import { FieldDBType, SQLOperator } from '../_constants/field';
 
+const sqlTypeMap = {
+	string: ['varchar', 'char', 'text', 'mediumtext'],
+	number: ['int', 'bigint']
+};
+
+const isStringType = (type: string) => {
+	return sqlTypeMap.string.find((sqlType) => {
+		return sqlType === type || type.includes(sqlType);
+	});
+};
+
+const isNumberType = (type: string) => {
+	return sqlTypeMap.number.find((sqlType) => {
+		return sqlType === type || type.includes(sqlType);
+	});
+};
+
 export const getValueByFieldType = (dbType: string, val: string) => {
-	switch (dbType) {
-	case 'varchar': return `'${val}'`;
-	case 'bigint': return val;
-	case 'mediumtext': return `'${val}'`;
-	default: return val;
+	if (isStringType(dbType)) {
+		return `'${val}'`;
+	} else if (isNumberType(dbType)) {
+		return val;
 	}
+	return val;
+	// switch (dbType) {
+	// case 'varchar': return `'${val}'`;
+	// case 'bigint': return val;
+	// case 'mediumtext': return `'${val}'`;
+	// default: return val;
+	// }
 };
 
 /** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
@@ -25,16 +48,22 @@ export const getValueByOperatorAndFieldType = (dbType: string, operator: string,
 
 /** 根据字段类型获取 sql 拼接时字段值的符号 */
 export const getQuoteByFieldType = (dbType: string) => {
-	switch (dbType) {
-	case FieldDBType.VARCHAR: {
+	if (isStringType(dbType)) {
 		return '\'';
-	}
-	case FieldDBType.BIGINT: {
+	} else if (isNumberType(dbType)) {
 		return '';
 	}
-	case FieldDBType.MEDIUMTEXT: {
-		return '\'';
-	}
-	default: return '';
-	}
+	return '';
+	// switch (dbType) {
+	// case FieldDBType.VARCHAR: {
+	// 	return '\'';
+	// }
+	// case FieldDBType.BIGINT: {
+	// 	return '';
+	// }
+	// case FieldDBType.MEDIUMTEXT: {
+	// 	return '\'';
+	// }
+	// default: return '';
+	// }
 };

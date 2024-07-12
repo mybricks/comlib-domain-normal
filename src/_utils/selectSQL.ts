@@ -126,9 +126,12 @@ const spliceWhereSQLFragmentByConditions = (fnParams: {
 	let prefix = '';
 
 	/** whereJoiner 不存在表示最外层 SQL */
-	if (!whereJoiner) {
-		/** 当 condition 存在时 */
-		prefix = `WHERE _STATUS_DELETED = 0${sql ? ' AND ' : ''}`;
+	// if (!whereJoiner) {
+	// 	/** 当 condition 存在时 */
+	// 	prefix = `WHERE _STATUS_DELETED = 0${sql ? ' AND ' : ''}`;
+	// }
+	if (!whereJoiner && sql) {
+		prefix = 'WHERE '
 	}
 
 	return prefix + sql;
@@ -175,8 +178,10 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		/** 查询总数语句 */
 		const countSql: string[] = [];
 		const fieldList: string[] = [];
-		const getTableName = table => isEdit ? table : `${table}__VIEW`;
-		const entityNames: string[] = [getTableName(curEntity.name)];
+		// const getTableName = table => isEdit ? table : `${table}__VIEW`;
+		// const entityNames: string[] = [getTableName(curEntity.name)];
+		const getTableName = table => table;
+		const entityNames: string[] = [getTableName(curEntity.id)];
 		const conditionFields: SelectedField[] = [];
 		const formatCondition = (condition: Condition[]) => {
 			condition.forEach(con => {
@@ -525,6 +530,8 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			curEntity,
 			entityFieldMap
 		});
+
+		console.log("whereSql: ", whereSql)
 		/** 前置 sql */
 		sql.push(`SELECT ${fieldList.join(', ')} FROM ${entityNames.join(' ')}`);
 		sql.push(whereSql);

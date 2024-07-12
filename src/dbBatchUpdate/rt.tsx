@@ -14,6 +14,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 				}
 
 				validateParams(val, data.rules.entities[0], data.rules.conAry, false);
+				env.collect('批量更新数据 params: ', val)
 				for (const item of val) {
 					const sql = spliceUpdateSQLByConditions({
 						conditions: data.rules.conditions,
@@ -23,6 +24,7 @@ export default function ({ env, data, outputs, inputs, onError }) {
 						isEdit,
 						encrypt: env.encrypt,
 					});
+					env.collect('批量更新数据 sql: ', sql)
 
 					await env.executeSql(sql);
 				}

@@ -24,8 +24,11 @@ export default function ({ env, data, outputs, inputs, onError }) {
 	};
 
 	const select = async (params) => {
+		env.collect('单条查询数据 params: ', params)
 		const [sql] = spliceSelectSQLByConditions(params) || [];
+		env.collect('单条查询数据 sql: ', sql)
 		let { rows } = await env.executeSql(sql);
+		env.collect('单条查询数据 res: ', { rows })
 
 		rows = Array.from(rows || []);
 		spliceDataFormat(params.fields || [], params.entities, rows);
