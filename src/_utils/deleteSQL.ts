@@ -84,7 +84,8 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name}${isEdit ? '' : '__VIEW'} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = "", _UPDATE_TIME = ${Date.now()}`);
+		// sql.push(`UPDATE ${curEntity.name}${isEdit ? '' : '__VIEW'} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = "", _UPDATE_TIME = ${Date.now()}`);
+		sql.push(`DELETE FROM ${curEntity.id}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			params,

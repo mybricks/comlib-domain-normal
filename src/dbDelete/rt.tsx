@@ -8,12 +8,14 @@ export default function ({ env, data, outputs, inputs, onError }) {
 
 	  if (data.rules) {
 		  try {
+				env.collect('删除数据 val: ', val);
 			  const sql = spliceDeleteSQLByConditions({
 					conditions: data.rules.conditions,
 					entities: data.rules.entities,
 					params: val,
 					isEdit,
 				});
+				env.collect('删除数据 sql: ', sql);
 	      env.executeSql(sql)
 	        .then(() => outputs['rtn']())
 	        .catch(ex => onError(`执行SQL发生错误,${ex?.message}`));
