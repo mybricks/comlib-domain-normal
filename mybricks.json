@@ -15,7 +15,11 @@
     "./src/_service/com.json",
     "./src/_var/com.json",
     "./src/_muilt-inputJs/com.json",
-    "./src/requestHeader/com.json"
+    "./src/requestHeader/com.json",
+    "./src/cookie-get/com.json",
+    "./src/cookie-set/com.json",
+    "./src/jwt-sign/com.json",
+    "./src/jwt-verify/com.json"
   ],
   "target": "nodejs"
 }

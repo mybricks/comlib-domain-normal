@@ -1,0 +1,5 @@
+{
+  "dynamic": false,
+  "secretKey": "mybricks",
+  "expiresIn": 86400
+}
