@@ -18,18 +18,15 @@ export const spliceInsertSQL = (params: {
 	// const sql = `INSERT INTO ${entity.name}${isEdit ? '' : '__VIEW'} `;
 	const sql = `INSERT INTO ${entity.id} `;
 
-	// const res: string[][] = [];
-	const res: Record<string, any>[] = [];
-	// const fieldAry = entity.fieldAry.filter(field => (field.bizType !== FieldBizType.MAPPING)).filter(field => (field.isPrimaryKey ? field.extra !== 'auto_increment' : true)).map(field => field.name);
+	const res: string[][] = [];
+	const fieldAry = entity.fieldAry.filter(field => (field.bizType !== FieldBizType.MAPPING)).filter(field => (field.isPrimaryKey ? field.extra !== 'auto_increment' : true)).map(field => field.name);
 
 	(batch ? data : [data]).forEach(item => {
-		// const valueAry: string[] = [];
-		const valueMap: Record<string, any> = {};
+		const valueAry: string[] = [];
 
 		entity.fieldAry.forEach(field => {
 			if (field.bizType !== FieldBizType.MAPPING) {
 				const con = conAry.find(con => con.to === `/${field.name}`);
-				let val;
 				if (con) {
 					/** 多级结构 */
 					const fromNames = con.from.split('/').filter(Boolean);
@@ -37,71 +34,43 @@ export const spliceInsertSQL = (params: {
 					const q = getQuoteByFieldType(field.dbType);
 
 					if (value === undefined || value === null) {
-						// valueAry.push('null');
-						val = 'null';
+						valueAry.push('null');
 					} else if (Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]') {
-						// valueAry.push(`${q}${JSON.stringify(field.useEncrypt ? encrypt(value) : value)}${q}`);
-						val = `${q}${JSON.stringify(field.useEncrypt ? encrypt(value) : value)}${q}`;
+						valueAry.push(`${q}${JSON.stringify(field.useEncrypt ? encrypt(value) : value)}${q}`);
 					} else {
-						// valueAry.push(`${q}${field.useEncrypt ? encrypt(value) : value}${q}`);
-						val = `${q}${field.useEncrypt ? encrypt(value) : value}${q}`;
+						valueAry.push(`${q}${field.useEncrypt ? encrypt(value) : value}${q}`);
 					}
 				} else {
 					if (field.isPrimaryKey) {
 						if (field.extra !== 'auto_increment') {
-							// valueAry.push(String(genUniqueId()));
-							val = String(genUniqueId());
+							valueAry.push(String(genUniqueId()));
 						}
 					} else if (field.name === '_STATUS_DELETED') {
-						// valueAry.push('0');
-						val = '0';
+						valueAry.push('0');
 					} else if (
 						['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name)
 						|| (field.bizType === FieldBizType.DATETIME && field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME)
 					) {
-						// valueAry.push(String(Date.now()));
-						val = String(Date.now());
+						valueAry.push(String(Date.now()));
 					} else if (field.defaultValueWhenCreate !== undefined && field.defaultValueWhenCreate !== null) {
 						const q = getQuoteByFieldType(field.dbType);
 
-						// valueAry.push(`${q}${field.useEncrypt ? encrypt(field.defaultValueWhenCreate) : field.defaultValueWhenCreate}${q}`);
-						val = `${q}${field.useEncrypt ? encrypt(field.defaultValueWhenCreate) : field.defaultValueWhenCreate}${q}`;
+						valueAry.push(`${q}${field.useEncrypt ? encrypt(field.defaultValueWhenCreate) : field.defaultValueWhenCreate}${q}`);
 					} else {
 						if (!field.notNull) {
-							val = 'null';
+							valueAry.push('default');
+						} else {
+							valueAry.push('null');
 						}
-						// valueAry.push('null');
 					}
 				}
-				if (val) {
-					valueMap[field.name] = val;
-				}
 			}
 		});
 
-		res.push(valueMap);
+		res.push(valueAry);
 	});
 
-	return 'START TRANSACTION;\n' + 
-	res.map((valueMap) => {
-		let keys = '';
-		let values = '';
-		Object.entries(valueMap).forEach(([key, value]) => {
-			if (!keys) {
-				keys = key;
-			} else {
-				keys += `,${key}`;
-			}
-			if (!values) {
-				values = value;
-			} else {
-				values += `,${value}`;
-			}
-		});
-		return `${sql}(${keys}) VALUES (${values});\n`;
-	}) + 
-	'COMMIT;';
-	// return `${sql}(${fieldAry.join(',')}) VALUES ${res.map(valueAry => `(${valueAry.join(',')})`).join(', ')}`;
+	return `${sql}(${fieldAry.join(',')}) VALUES ${res.map(valueAry => `(${valueAry.join(',')})`).join(', ')}`;
 };
 
 export const validateParams = (data: AnyType, entity: Entity, conAry: Array<{ from: string; to: string }>, isInsert = true) => {
