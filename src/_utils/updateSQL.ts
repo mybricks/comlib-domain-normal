@@ -30,7 +30,8 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 				return '';
 			}
 
-			return `${index ? ', ' : ''}${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
+			return `${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
+			// return `${index ? ', ' : ''}${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
 		})
 		.filter(Boolean)
 		.reduce((p, c) => {
