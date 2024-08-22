@@ -19,7 +19,8 @@
     "./src/cookie-get/com.json",
     "./src/cookie-set/com.json",
     "./src/jwt-sign/com.json",
-    "./src/jwt-verify/com.json"
+    "./src/jwt-verify/com.json",
+    "./src/weapp-login/com.json"
   ],
   "target": "nodejs"
 }
