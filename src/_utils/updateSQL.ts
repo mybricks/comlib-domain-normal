@@ -33,7 +33,14 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			return `${index ? ', ' : ''}${toFieldName} = ${value === null ? null : `${q}${Array.isArray(value) || Object.prototype.toString.call(value) === '[object Object]' ? JSON.stringify(field.useEncrypt ? encrypt(value) : value) : (field.useEncrypt ? encrypt(value) : value)}${q}`}`;
 		})
 		.filter(Boolean)
-		.join('');
+		.reduce((p, c) => {
+			if (!p) {
+				return p + c;
+			} else {
+				return p + ` , ${c}`;
+			}
+		}, '' as any);
+	// .join('');
 };
 
 export const spliceUpdateSQLByConditions = (fnParams: {
