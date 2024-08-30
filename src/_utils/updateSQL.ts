@@ -24,7 +24,8 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			
 			const fromNames = from.split('/').filter(Boolean);
 			const value = get(params, fromNames);
-			const q = getQuoteByFieldType(field.dbType as string);
+			// 如果value为字符类型，那么默认就是字符类型
+			const q = typeof value === 'string' ? '\'' : getQuoteByFieldType(field.dbType as string);
 
 			if (value === undefined) {
 				return '';
