@@ -387,7 +387,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							}
 						})
 						.filter(Boolean);
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.id)} ${leftJoinSqlList.join(' ')}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.id)}.${(relationField?.name)}`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.id)} ${leftJoinSqlList.join(' ')}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_${relationField?.relationField?.name ?? 'id'} = ${getTableName(parentEntity.id)}.${(relationField?.name)}`;
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
 					const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
