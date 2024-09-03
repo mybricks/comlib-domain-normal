@@ -1,6 +1,6 @@
 {
   "name": "@mybricks/comlib-domain-normal",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "MyBricks领域建模通用组件库",
   "main": "index.js",
   "author": "CheMingjun",

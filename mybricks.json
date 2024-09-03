@@ -20,6 +20,7 @@
     "./src/cookie-set/com.json",
     "./src/jwt-sign/com.json",
     "./src/jwt-verify/com.json",
+    "./src/hash/com.json",
     "./src/weapp-login/com.json"
   ],
   "target": "nodejs"

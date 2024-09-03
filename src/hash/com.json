@@ -1,0 +1,43 @@
+{
+  "title": "哈希计算",
+  "namespace": "mybricks.domain.hashFunction",
+  "author": "MyBricks",
+  "author_name": "MyBricks",
+  "version": "1.0.0",
+  "description": "根据入参计算哈希值",
+  "icon": "./icon.svg",
+  "runtime": "./rt.ts",
+  "data": "./data.json",
+  "editors": "./editors.tsx",
+  "rtType": "js",
+  "inputs": [
+    {
+      "id": "params",
+      "title": "参数",
+      "schema": {
+        "type": "string"
+      },
+      "rels": [
+        "rtn",
+        "rtn_error"
+      ],
+      "editable": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "rtn",
+      "title": "成功",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "rtn_error",
+      "title": "失败",
+      "schema": {
+        "type": "object"
+      }
+    }
+  ]
+}

@@ -9,11 +9,9 @@ export default function ({ env, data, inputs, outputs, onError }: RuntimeParams<
 	const runJSParams = {
 		outputs: convertObject2Array(outputs),
 		env: {
+			...env,
 			executeSql: sql => env.executeSql(sql),
-			genUniqueId: env.genUniqueId,
 			getEntityName: isDebug ? _ => _ : env.getEntityName,
-			encrypt: env.encrypt,
-			decrypt: env.decrypt,
 		},
 	};
 	try {

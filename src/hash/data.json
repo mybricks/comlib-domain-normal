@@ -1,0 +1,5 @@
+{
+  "salt": "",
+  "iterations": 1000,
+  "algorithm": "md5"
+}

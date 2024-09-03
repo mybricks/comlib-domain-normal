@@ -7,10 +7,10 @@ export default function ({env, data, outputs, inputs, onError}) {
 				})
 				relOutpus['rtn'](token)
 			} catch (error) {
-				onError(`生成jwt出错：${error?.message ?? '未知错误'}`)
+				onError(`生成token出错，${error?.message ?? '未知错误'}`)
 			}
 		} else {
-			onError('生成jwt的参数必须存在')
+			onError('生成token的参数不存在或者格式有误')
 		}
   })
 }
